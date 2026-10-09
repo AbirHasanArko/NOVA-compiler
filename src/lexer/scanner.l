@@ -97,9 +97,9 @@ static Token make_error(const std::string& msg) {
 "char"          { return make_token(TokenKind::KW_CHAR); }
 "str"           { return make_token(TokenKind::KW_STR); }
 "void"          { return make_token(TokenKind::KW_VOID); }
-"if"            { return make_token(TokenKind::KW_IF); }
-"elif"          { return make_token(TokenKind::KW_ELIF); }
-"else"          { return make_token(TokenKind::KW_ELSE); }
+"detect"        { return make_token(TokenKind::KW_DETECT); }
+"redetect"      { return make_token(TokenKind::KW_REDETECT); }
+"fallback"      { return make_token(TokenKind::KW_FALLBACK); }
 "route"         { return make_token(TokenKind::KW_ROUTE); }
 "case"          { return make_token(TokenKind::KW_CASE); }
 "default"       { return make_token(TokenKind::KW_DEFAULT); }

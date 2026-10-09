@@ -127,7 +127,7 @@
         },
         {
           "name": "keyword.control.conditional.nova",
-          "match": "\\b(if|elif|else|route|case|default)\\b"
+          "match": "\\b(detect|redetect|fallback|route|case|default)\\b"
         },
         {
           "name": "keyword.control.loop.nova",

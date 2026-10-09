@@ -42,7 +42,7 @@ The following tokens are reserved keywords:
 | Execution Capsule | `ignite`, `do`, `end`, `proc`, `ret` |
 | State Binding | `const` (immutable), `flux` (mutable) |
 | Primitive Types | `i32`, `f32`, `bool`, `char`, `str`, `void` |
-| Control Flow | `if`, `elif`, `else`, `route`, `case`, `default` |
+| Control Flow | `detect`, `redetect`, `fallback`, `route`, `case`, `default` |
 | Execution Cycles | `orbit`, `in`, `step`, `cruise`, `halt`, `skip` |
 | Telemetry I/O | `transmit`, `receive` |
 | Contracts & Safety | `verify`, `require` |
@@ -143,13 +143,13 @@ ignite do
 end
 ```
 
-### 6.2 Conditionals
+### 6.2 Conditionals (Detection Branching)
 ```nova
-if condition do
+detect condition do
     // statements
-elif condition2 do
+redetect condition2 do
     // statements
-else do
+fallback do
     // statements
 end
 ```

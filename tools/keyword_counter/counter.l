@@ -17,16 +17,15 @@ static KeywordEntry g_keywords[] = {
     {"const", 0},
     {"cruise", 0},
     {"default", 0},
+    {"detect", 0},
     {"do", 0},
-    {"elif", 0},
-    {"else", 0},
     {"end", 0},
     {"f32", 0},
+    {"fallback", 0},
     {"false", 0},
     {"flux", 0},
     {"halt", 0},
     {"i32", 0},
-    {"if", 0},
     {"ignite", 0},
     {"in", 0},
     {"not", 0},
@@ -34,6 +33,7 @@ static KeywordEntry g_keywords[] = {
     {"or", 0},
     {"proc", 0},
     {"receive", 0},
+    {"redetect", 0},
     {"require", 0},
     {"ret", 0},
     {"route", 0},
@@ -95,9 +95,9 @@ static void record_keyword(const char* name) {
 "str"               { record_keyword("str"); }
 "void"              { record_keyword("void"); }
 
-"if"                { record_keyword("if"); }
-"elif"              { record_keyword("elif"); }
-"else"              { record_keyword("else"); }
+"detect"            { record_keyword("detect"); }
+"redetect"          { record_keyword("redetect"); }
+"fallback"          { record_keyword("fallback"); }
 "route"             { record_keyword("route"); }
 "case"              { record_keyword("case"); }
 "default"           { record_keyword("default"); }

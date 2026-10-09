@@ -23,9 +23,9 @@ KW_CHAR       ::= "char"
 KW_STR        ::= "str"
 KW_VOID       ::= "void"
 
-KW_IF         ::= "if"
-KW_ELIF       ::= "elif"
-KW_ELSE       ::= "else"
+KW_DETECT     ::= "detect"
+KW_REDETECT   ::= "redetect"
+KW_FALLBACK   ::= "fallback"
 KW_ROUTE      ::= "route"
 KW_CASE       ::= "case"
 KW_DEFAULT    ::= "default"
@@ -182,7 +182,7 @@ stmt
     ::= declaration_stmt SEMICOLON
     | assignment_stmt SEMICOLON
     | expr_stmt SEMICOLON
-    | if_stmt
+    | detect_stmt
     | cruise_stmt
     | orbit_stmt
     | route_stmt
@@ -236,17 +236,17 @@ skip_stmt
 
 ### 3.5 Control Flow Statements
 ```bnf
-if_stmt
-    ::= KW_IF expr KW_DO stmt_list elif_list opt_else KW_END
+detect_stmt
+    ::= KW_DETECT expr KW_DO stmt_list redetect_list opt_fallback KW_END
     ;
 
-elif_list
-    ::= elif_list KW_ELIF expr KW_DO stmt_list
+redetect_list
+    ::= redetect_list KW_REDETECT expr KW_DO stmt_list
     | /* empty */
     ;
 
-opt_else
-    ::= KW_ELSE KW_DO stmt_list
+opt_fallback
+    ::= KW_FALLBACK KW_DO stmt_list
     | /* empty */
     ;
 

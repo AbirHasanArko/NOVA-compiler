@@ -31,9 +31,9 @@ enum class TokenKind {
     KW_VOID,
 
     // Control Flow
-    KW_IF,
-    KW_ELIF,
-    KW_ELSE,
+    KW_DETECT,
+    KW_REDETECT,
+    KW_FALLBACK,
     KW_ROUTE,
     KW_CASE,
     KW_DEFAULT,
@@ -128,9 +128,9 @@ inline const char* token_kind_to_string(TokenKind kind) {
         case TokenKind::KW_CHAR:       return "KW_CHAR";
         case TokenKind::KW_STR:        return "KW_STR";
         case TokenKind::KW_VOID:       return "KW_VOID";
-        case TokenKind::KW_IF:         return "KW_IF";
-        case TokenKind::KW_ELIF:       return "KW_ELIF";
-        case TokenKind::KW_ELSE:       return "KW_ELSE";
+        case TokenKind::KW_DETECT:     return "KW_DETECT";
+        case TokenKind::KW_REDETECT:   return "KW_REDETECT";
+        case TokenKind::KW_FALLBACK:   return "KW_FALLBACK";
         case TokenKind::KW_ROUTE:      return "KW_ROUTE";
         case TokenKind::KW_CASE:       return "KW_CASE";
         case TokenKind::KW_DEFAULT:    return "KW_DEFAULT";

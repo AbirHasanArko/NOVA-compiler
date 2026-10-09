@@ -8,7 +8,7 @@ ignite do end
 proc ret
 const flux
 i32 f32 bool char str void
-if elif else
+detect redetect fallback
 route case default
 orbit in step cruise halt skip
 transmit receive

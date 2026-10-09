@@ -67,7 +67,7 @@
     ]
   ],
   "indentationRules": {
-    "increaseIndentPattern": "^\\s*(proc|ignite|if|elif|else|cruise|orbit|route|case|default).*?\\bdo\\s*(//.*)?$",
-    "decreaseIndentPattern": "^\\s*(end|elif|else|case|default)\\b"
+    "increaseIndentPattern": "^\\s*(proc|ignite|detect|redetect|fallback|cruise|orbit|route|case|default).*?\\bdo\\s*(//.*)?$",
+    "decreaseIndentPattern": "^\\s*(end|redetect|fallback|case|default)\\b"
   }
 }

@@ -37,11 +37,11 @@ ignite do
 
     // Counted Stepped Orbit Loop
     orbit cycle in 1..max_cycles step 1 do
-        if cycle == 2 do
+        detect cycle == 2 do
             skip; // skip iteration 2
-        elif cycle == 8 do
+        redetect cycle == 8 do
             halt; // halt loop early at cycle 8
-        else do
+        fallback do
             transmit("Executing orbital telemetry cycle:");
             transmit(cycle);
         end
@@ -50,7 +50,7 @@ ignite do
     // Cruise Cycle with compound logical expressions
     cruise active and (altitude > 100.0 or not signal_lost) do
         altitude = altitude - 75.5;
-        if altitude <= 200.0 do
+        detect altitude <= 200.0 do
             active = false;
         end
     end
