@@ -131,7 +131,7 @@
         },
         {
           "name": "keyword.control.loop.nova",
-          "match": "\\b(orbit|in|step|while)\\b"
+          "match": "\\b(orbit|in|step|cruise)\\b"
         },
         {
           "name": "keyword.control.flow.jump.nova",

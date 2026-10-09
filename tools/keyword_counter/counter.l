@@ -15,6 +15,7 @@ static KeywordEntry g_keywords[] = {
     {"case", 0},
     {"char", 0},
     {"const", 0},
+    {"cruise", 0},
     {"default", 0},
     {"do", 0},
     {"elif", 0},
@@ -42,8 +43,7 @@ static KeywordEntry g_keywords[] = {
     {"transmit", 0},
     {"true", 0},
     {"verify", 0},
-    {"void", 0},
-    {"while", 0}
+    {"void", 0}
 };
 
 static const int NUM_KEYWORDS = sizeof(g_keywords) / sizeof(g_keywords[0]);
@@ -105,7 +105,7 @@ static void record_keyword(const char* name) {
 "orbit"             { record_keyword("orbit"); }
 "in"                { record_keyword("in"); }
 "step"              { record_keyword("step"); }
-"while"             { record_keyword("while"); }
+"cruise"            { record_keyword("cruise"); }
 "halt"              { record_keyword("halt"); }
 "skip"              { record_keyword("skip"); }
 

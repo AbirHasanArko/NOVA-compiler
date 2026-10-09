@@ -42,7 +42,7 @@ enum class TokenKind {
     KW_ORBIT,
     KW_IN,
     KW_STEP,
-    KW_WHILE,
+    KW_CRUISE,
     KW_HALT,
     KW_SKIP,
 
@@ -137,7 +137,7 @@ inline const char* token_kind_to_string(TokenKind kind) {
         case TokenKind::KW_ORBIT:      return "KW_ORBIT";
         case TokenKind::KW_IN:         return "KW_IN";
         case TokenKind::KW_STEP:       return "KW_STEP";
-        case TokenKind::KW_WHILE:      return "KW_WHILE";
+        case TokenKind::KW_CRUISE:     return "KW_CRUISE";
         case TokenKind::KW_HALT:       return "KW_HALT";
         case TokenKind::KW_SKIP:       return "KW_SKIP";
         case TokenKind::KW_TRANSMIT:   return "KW_TRANSMIT";

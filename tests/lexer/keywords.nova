@@ -10,7 +10,7 @@ const flux
 i32 f32 bool char str void
 if elif else
 route case default
-orbit in step while halt skip
+orbit in step cruise halt skip
 transmit receive
 verify require
 and or not true false

@@ -43,7 +43,7 @@ The following tokens are reserved keywords:
 | State Binding | `const` (immutable), `flux` (mutable) |
 | Primitive Types | `i32`, `f32`, `bool`, `char`, `str`, `void` |
 | Control Flow | `if`, `elif`, `else`, `route`, `case`, `default` |
-| Execution Cycles | `orbit`, `in`, `step`, `while`, `halt`, `skip` |
+| Execution Cycles | `orbit`, `in`, `step`, `cruise`, `halt`, `skip` |
 | Telemetry I/O | `transmit`, `receive` |
 | Contracts & Safety | `verify`, `require` |
 | Logical Operators | `and`, `or`, `not` |
@@ -154,9 +154,9 @@ else do
 end
 ```
 
-### 6.3 While Cycles
+### 6.3 Cruise Cycles (Conditional Loop)
 ```nova
-while condition do
+cruise condition do
     // statements
 end
 ```

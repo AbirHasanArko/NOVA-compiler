@@ -106,7 +106,7 @@ static Token make_error(const std::string& msg) {
 "orbit"         { return make_token(TokenKind::KW_ORBIT); }
 "in"            { return make_token(TokenKind::KW_IN); }
 "step"          { return make_token(TokenKind::KW_STEP); }
-"while"         { return make_token(TokenKind::KW_WHILE); }
+"cruise"        { return make_token(TokenKind::KW_CRUISE); }
 "halt"          { return make_token(TokenKind::KW_HALT); }
 "skip"          { return make_token(TokenKind::KW_SKIP); }
 "transmit"      { return make_token(TokenKind::KW_TRANSMIT); }

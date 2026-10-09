@@ -33,7 +33,7 @@ KW_DEFAULT    ::= "default"
 KW_ORBIT      ::= "orbit"
 KW_IN         ::= "in"
 KW_STEP       ::= "step"
-KW_WHILE      ::= "while"
+KW_CRUISE     ::= "cruise"
 KW_HALT       ::= "halt"
 KW_SKIP       ::= "skip"
 
@@ -183,7 +183,7 @@ stmt
     | assignment_stmt SEMICOLON
     | expr_stmt SEMICOLON
     | if_stmt
-    | while_stmt
+    | cruise_stmt
     | orbit_stmt
     | route_stmt
     | transmit_stmt SEMICOLON
@@ -250,8 +250,8 @@ opt_else
     | /* empty */
     ;
 
-while_stmt
-    ::= KW_WHILE expr KW_DO stmt_list KW_END
+cruise_stmt
+    ::= KW_CRUISE expr KW_DO stmt_list KW_END
     ;
 
 orbit_stmt

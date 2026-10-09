@@ -12,6 +12,7 @@ bool             2
 case             2
 char             2
 const            3
+cruise           1
 default          1
 do               10
 elif             1
@@ -40,5 +41,4 @@ transmit         9
 true             1
 verify           2
 void             1
-while            1
 ==================================================

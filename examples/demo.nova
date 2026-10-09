@@ -47,8 +47,8 @@ ignite do
         end
     end
 
-    // While Cycle with compound logical expressions
-    while active and (altitude > 100.0 or not signal_lost) do
+    // Cruise Cycle with compound logical expressions
+    cruise active and (altitude > 100.0 or not signal_lost) do
         altitude = altitude - 75.5;
         if altitude <= 200.0 do
             active = false;
