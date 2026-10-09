@@ -22,10 +22,9 @@ TARGET := nova
 BUILD_DIR := build
 BIN_DIR := bin
 
-# Source files
-GEN_SRCS := src/lexer/lex.yy.cpp
-SRCS := src/main.cpp src/lexer/lexer.cpp $(GEN_SRCS)
-OBJS := $(patsubst src/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
+# Source and Object files
+GEN_SRCS := src/lexer/lex.yy.c
+OBJS := $(BUILD_DIR)/main.o $(BUILD_DIR)/lexer/lexer.o $(BUILD_DIR)/lexer/lex.yy.o
 
 .PHONY: all clean test help
 
@@ -36,19 +35,23 @@ $(TARGET): $(OBJS) | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
 	@$(PYTHON) -c "import shutil; shutil.copy('$(TARGET)', '$(BIN_DIR)/$(TARGET)')" 2>/dev/null || true
 
-# Flex generation rule
-src/lexer/lex.yy.cpp: src/lexer/scanner.l
+# Flex generation rule (producing lex.yy.c)
+src/lexer/lex.yy.c: src/lexer/scanner.l
 	@mkdir -p src/lexer
 	@echo [FLEX] $<
 	$(FLEX_BIN) -o $@ $<
 
-# C++ Compilation rule
+# C++ Compilation rule for standard .cpp sources
 $(BUILD_DIR)/%.o: src/%.cpp | $(BUILD_DIR)
 	@mkdir -p $(dir $@)
 	@echo [CXX] $<
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/lexer/lex.yy.o: src/lexer/lex.yy.cpp
+# Compilation rule for Flex generated .c file (compiled as C++)
+$(BUILD_DIR)/lexer/lex.yy.o: src/lexer/lex.yy.c | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
+	@echo [CXX] $<
+	$(CXX) $(CXXFLAGS) -x c++ -c $< -o $@
 
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)
@@ -62,7 +65,7 @@ test: $(TARGET)
 
 clean:
 	@echo [CLEAN] Removing build artifacts...
-	@$(PYTHON) -c "import shutil, os, glob; [shutil.rmtree(d, ignore_errors=True) for d in ['build', 'bin']]; [os.remove(f) for f in ['src/lexer/lex.yy.cpp'] if os.path.exists(f)]; [os.remove(f) for f in glob.glob('nova*') if os.path.isfile(f) and not f.endswith('.cpp') and not f.endswith('.md')]"
+	@$(PYTHON) -c "import shutil, os, glob; [shutil.rmtree(d, ignore_errors=True) for d in ['build', 'bin']]; [os.remove(f) for f in ['src/lexer/lex.yy.c', 'src/lexer/lex.yy.cpp'] if os.path.exists(f)]; [os.remove(f) for f in glob.glob('nova*') if os.path.isfile(f) and not f.endswith('.cpp') and not f.endswith('.md')]"
 
 help:
 	@echo "Available make targets:"
