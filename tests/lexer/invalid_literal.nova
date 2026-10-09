@@ -1,0 +1,9 @@
+// TEST: tests/lexer/invalid_literal.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --tokens
+// EXPECT_ERR: unterminated string literal
+// EXIT_CODE: 1
+
+ignite do
+    const unclosed: str = "This string is never closed;
+end

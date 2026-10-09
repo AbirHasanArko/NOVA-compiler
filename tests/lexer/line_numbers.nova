@@ -1,0 +1,16 @@
+// TEST: tests/lexer/line_numbers.nova
+// KIND: PASS
+// FLAGS: --tokens
+// EXPECT_OUT: Line 14
+// EXIT_CODE: 0
+
+// Line 1
+// Line 2
+// Line 3
+// Line 4
+// Line 5
+// Line 6
+// Line 7
+ignite do
+    transmit(42);
+end

@@ -1,3 +1,4 @@
+#include "lexer/lexer.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -184,9 +185,14 @@ int main(int argc, char* argv[]) {
     }
 
     switch (options.mode) {
-        case nova::Mode::Tokens:
-            std::cout << "[NOVA Phase 2 Lexer]: Tokenization will be implemented in Phase 2 for: " << options.input_file << "\n";
-            break;
+        case nova::Mode::Tokens: {
+            nova::Lexer lexer(options.input_file);
+            lexer.print_tokens(std::cout);
+            if (lexer.has_error()) {
+                return 1;
+            }
+            return 0;
+        }
         case nova::Mode::AST:
             std::cout << "[NOVA Phase 4 AST]: AST dump will be implemented in Phase 4 for: " << options.input_file << "\n";
             break;

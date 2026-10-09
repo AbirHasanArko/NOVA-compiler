@@ -1,0 +1,19 @@
+// TEST: tests/lexer/literals.nova
+// KIND: PASS
+// FLAGS: --tokens
+// EXPECT_OUT: STR_LIT
+// EXIT_CODE: 0
+
+0
+42
+1000
+3.1415
+0.0
+128.5
+true
+false
+'a'
+'\n'
+'\\'
+"Hello, NOVA Telemetry!"
+"Escape sequence: \"nested\" and \t tab"

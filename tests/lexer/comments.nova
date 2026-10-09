@@ -1,0 +1,17 @@
+// TEST: tests/lexer/comments.nova
+// KIND: PASS
+// FLAGS: --tokens
+// EXPECT_OUT: KW_IGNITE
+// EXIT_CODE: 0
+
+// This is a single line comment at start of file
+ignite do
+    // Inner comment
+    const x: i32 = 10; /* inline block comment */
+    /*
+     * Multi-line comment spanning
+     * multiple telemetry cycles
+     */
+    transmit(x);
+end
+// Trailing comment

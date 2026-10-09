@@ -1,0 +1,16 @@
+// TEST: tests/lexer/keywords.nova
+// KIND: PASS
+// FLAGS: --tokens
+// EXPECT_OUT: KW_IGNITE
+// EXIT_CODE: 0
+
+ignite do end
+proc ret
+const flux
+i32 f32 bool char str void
+if elif else
+route case default
+orbit in step while halt skip
+transmit receive
+verify require
+and or not true false

@@ -1,0 +1,9 @@
+// TEST: tests/lexer/operators.nova
+// KIND: PASS
+// FLAGS: --tokens
+// EXPECT_OUT: OP_POW
+// EXIT_CODE: 0
+
++ - * / % **
+< <= > >= == != =
+.. -> : ; , . ( ) [ ]

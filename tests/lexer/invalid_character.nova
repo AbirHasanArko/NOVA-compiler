@@ -1,0 +1,9 @@
+// TEST: tests/lexer/invalid_character.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --tokens
+// EXPECT_ERR: invalid character: '@'
+// EXIT_CODE: 1
+
+ignite do
+    const invalid_symbol = @;
+end

@@ -1,0 +1,12 @@
+// TEST: tests/lexer/identifiers.nova
+// KIND: PASS
+// FLAGS: --tokens
+// EXPECT_OUT: IDENT
+// EXIT_CODE: 0
+
+x
+_private_var
+orbital_velocity_km_s
+thrust1
+thrust_2_alpha
+IGNITE_SIGNAL
