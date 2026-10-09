@@ -1,0 +1,8 @@
+// TEST: tests/cli/valid_stub.nova
+// KIND: PASS
+// EXPECT_OUT: Compiling tests/cli/valid_stub.nova
+// EXIT_CODE: 0
+
+ignite do
+    transmit("NOVA Bootstrap Online.");
+end
