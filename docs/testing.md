@@ -45,7 +45,7 @@ tests/
 │   ├── invalid_character.nova
 │   └── line_numbers.nova
 ├── parser/            # Syntactic correctness & recovery
-│   ├── hello.nova
+│   ├── ignite.nova
 │   ├── missing_end.nova
 │   └── unexpected_token.nova
 ├── ast/               # Tree representation checks
@@ -56,15 +56,15 @@ tests/
 │   ├── immutable_assign.nova
 │   ├── undeclared_var.nova
 │   └── type_mismatch.nova
-├── control_flow/      # if, while, loop, select constructs
-│   ├── nested_loops.nova
-│   └── select_cases.nova
-├── functions/         # Call conventions, recursion, arity
+├── control_flow/      # if, while, orbit, route constructs
+│   ├── orbit_cycles.nova
+│   └── route_dispatch.nova
+├── functions/         # Procedures, call conventions, recursion, arity
 │   ├── recursion.nova
 │   └── arity_mismatch.nova
-├── contracts/         # Runtime assert & require checks
-│   ├── assert_pass.nova
-│   └── assert_fail.nova
+├── contracts/         # Runtime verify & require checks
+│   ├── verify_pass.nova
+│   └── verify_fail.nova
 ├── ir/                # Intermediate code verification
 │   └── tac_emission.nova
 ├── optimization/      # Optimization correctness & safety
@@ -72,7 +72,7 @@ tests/
 │   └── contract_dce.nova
 └── integration/       # End-to-end benchmark programs
     ├── fibonacci.nova
-    └── factorial.nova
+    └── telemetry_calc.nova
 ```
 
 ---
@@ -84,31 +84,31 @@ Test files are standard `.nova` source files with embedded directive headers:
 ```nova
 // TEST: tests/semantic/immutable_assign.nova
 // KIND: EXPECTED_ERROR
-// EXPECT_ERR: cannot assign to immutable variable 'x'
+// EXPECT_ERR: cannot assign to immutable constant 'x'
 // EXIT_CODE: 1
 
-entry do
-    val x: i32 = 10;
+ignite do
+    const x: i32 = 10;
     x = 20; // Error
 end
 ```
 
 For positive tests:
 ```nova
-// TEST: tests/integration/factorial.nova
+// TEST: tests/integration/telemetry_calc.nova
 // KIND: PASS
 // EXPECT_OUT: 120
 // EXIT_CODE: 0
 
-fn factorial(n: i32) -> i32 do
+proc factorial(n: i32) -> i32 do
     if n <= 1 do
         ret 1;
     end
     ret n * factorial(n - 1);
 end
 
-entry do
-    emit(factorial(5));
+ignite do
+    transmit(factorial(5));
 end
 ```
 

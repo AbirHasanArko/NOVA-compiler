@@ -8,80 +8,80 @@ This document defines the formal Context-Free Grammar (CFG) for the NOVA program
 
 ### 1.1 Keywords
 ```text
-KW_ENTRY    ::= "entry"
-KW_FN       ::= "fn"
-KW_RET      ::= "ret"
-KW_VAL      ::= "val"
-KW_VAR      ::= "var"
-KW_DO       ::= "do"
-KW_END      ::= "end"
+KW_IGNITE     ::= "ignite"
+KW_PROC       ::= "proc"
+KW_RET        ::= "ret"
+KW_CONST      ::= "const"
+KW_FLUX       ::= "flux"
+KW_DO         ::= "do"
+KW_END        ::= "end"
 
-KW_I32      ::= "i32"
-KW_F32      ::= "f32"
-KW_BOOL     ::= "bool"
-KW_CHAR     ::= "char"
-KW_STR      ::= "str"
-KW_VOID     ::= "void"
+KW_I32        ::= "i32"
+KW_F32        ::= "f32"
+KW_BOOL       ::= "bool"
+KW_CHAR       ::= "char"
+KW_STR        ::= "str"
+KW_VOID       ::= "void"
 
-KW_IF       ::= "if"
-KW_ELIF     ::= "elif"
-KW_ELSE     ::= "else"
-KW_SELECT   ::= "select"
-KW_CASE     ::= "case"
-KW_DEFAULT  ::= "default"
+KW_IF         ::= "if"
+KW_ELIF       ::= "elif"
+KW_ELSE       ::= "else"
+KW_ROUTE      ::= "route"
+KW_CASE       ::= "case"
+KW_DEFAULT    ::= "default"
 
-KW_LOOP     ::= "loop"
-KW_IN       ::= "in"
-KW_STEP     ::= "step"
-KW_WHILE    ::= "while"
-KW_BREAK    ::= "break"
-KW_NEXT     ::= "next"
+KW_ORBIT      ::= "orbit"
+KW_IN         ::= "in"
+KW_STEP       ::= "step"
+KW_WHILE      ::= "while"
+KW_HALT       ::= "halt"
+KW_SKIP       ::= "skip"
 
-KW_EMIT     ::= "emit"
-KW_READ     ::= "read"
-KW_ASSERT   ::= "assert"
-KW_REQUIRE  ::= "require"
+KW_TRANSMIT   ::= "transmit"
+KW_RECEIVE    ::= "receive"
+KW_VERIFY     ::= "verify"
+KW_REQUIRE    ::= "require"
 
-KW_AND      ::= "and"
-KW_OR       ::= "or"
-KW_NOT      ::= "not"
-KW_TRUE     ::= "true"
-KW_FALSE    ::= "false"
+KW_AND        ::= "and"
+KW_OR         ::= "or"
+KW_NOT        ::= "not"
+KW_TRUE       ::= "true"
+KW_FALSE      ::= "false"
 ```
 
 ### 1.2 Operators and Punctuators
 ```text
-OP_ADD      ::= "+"
-OP_SUB      ::= "-"
-OP_MUL      ::= "*"
-OP_DIV      ::= "/"
-OP_MOD      ::= "%"
-OP_POW      ::= "**"
+OP_ADD        ::= "+"
+OP_SUB        ::= "-"
+OP_MUL        ::= "*"
+OP_DIV        ::= "/"
+OP_MOD        ::= "%"
+OP_POW        ::= "**"
 
-OP_LT       ::= "<"
-OP_LE       ::= "<="
-OP_GT       ::= ">"
-OP_GE       ::= ">="
-OP_EQ       ::= "=="
-OP_NEQ      ::= "!="
-OP_ASSIGN   ::= "="
+OP_LT         ::= "<"
+OP_LE         ::= "<="
+OP_GT         ::= ">"
+OP_GE         ::= ">="
+OP_EQ         ::= "=="
+OP_NEQ        ::= "!="
+OP_ASSIGN     ::= "="
 
-DOTDOT      ::= ".."
-ARROW       ::= "->"
-COLON       ::= ":"
-SEMICOLON   ::= ";"
-COMMA       ::= ","
-LPAREN      ::= "("
-RPAREN      ::= ")"
+DOTDOT        ::= ".."
+ARROW         ::= "->"
+COLON         ::= ":"
+SEMICOLON     ::= ";"
+COMMA         ::= ","
+LPAREN        ::= "("
+RPAREN        ::= ")"
 ```
 
 ### 1.3 Literals & Identifiers
 ```text
-IDENT       ::= [a-zA-Z_][a-zA-Z0-9_]*
-INT_LIT     ::= [0-9]+
-FLOAT_LIT   ::= [0-9]+\.[0-9]+
-CHAR_LIT    ::= '[^'\\]' | '\\[ntr\\'0]'
-STR_LIT     ::= \"([^"\\]|\\.)*\"
+IDENT         ::= [a-zA-Z_][a-zA-Z0-9_]*
+INT_LIT       ::= [0-9]+
+FLOAT_LIT     ::= [0-9]+\.[0-9]+
+CHAR_LIT      ::= '[^'\\]' | '\\[ntr\\'0]'
+STR_LIT       ::= \"([^"\\]|\\.)*\"
 ```
 
 ---
@@ -110,24 +110,24 @@ Precedence rules declared from lowest to highest:
 ### 3.1 Top-Level Program Structure
 ```bnf
 program
-    ::= function_decl_list entry_block
-    | entry_block
+    ::= proc_decl_list ignite_block
+    | ignite_block
     ;
 
-function_decl_list
-    ::= function_decl_list function_decl
-    | function_decl
+proc_decl_list
+    ::= proc_decl_list proc_decl
+    | proc_decl
     ;
 
-entry_block
-    ::= KW_ENTRY KW_DO stmt_list KW_END
+ignite_block
+    ::= KW_IGNITE KW_DO stmt_list KW_END
     ;
 ```
 
-### 3.2 Functions
+### 3.2 Procedures (`proc`)
 ```bnf
-function_decl
-    ::= KW_FN IDENT LPAREN opt_param_list RPAREN opt_return_type KW_DO opt_require_list stmt_list KW_END
+proc_decl
+    ::= KW_PROC IDENT LPAREN opt_param_list RPAREN opt_return_type KW_DO opt_require_list stmt_list KW_END
     ;
 
 opt_param_list
@@ -184,20 +184,20 @@ stmt
     | expr_stmt SEMICOLON
     | if_stmt
     | while_stmt
-    | loop_stmt
-    | select_stmt
-    | emit_stmt SEMICOLON
-    | read_stmt SEMICOLON
-    | assert_stmt SEMICOLON
+    | orbit_stmt
+    | route_stmt
+    | transmit_stmt SEMICOLON
+    | receive_stmt SEMICOLON
+    | verify_stmt SEMICOLON
     | ret_stmt SEMICOLON
-    | break_stmt SEMICOLON
-    | next_stmt SEMICOLON
+    | halt_stmt SEMICOLON
+    | skip_stmt SEMICOLON
     ;
 
 declaration_stmt
-    ::= KW_VAL IDENT COLON type OP_ASSIGN expr
-    | KW_VAR IDENT COLON type
-    | KW_VAR IDENT COLON type OP_ASSIGN expr
+    ::= KW_CONST IDENT COLON type OP_ASSIGN expr
+    | KW_FLUX IDENT COLON type
+    | KW_FLUX IDENT COLON type OP_ASSIGN expr
     ;
 
 assignment_stmt
@@ -208,16 +208,16 @@ expr_stmt
     ::= expr
     ;
 
-emit_stmt
-    ::= KW_EMIT LPAREN expr RPAREN
+transmit_stmt
+    ::= KW_TRANSMIT LPAREN expr RPAREN
     ;
 
-read_stmt
-    ::= KW_READ LPAREN IDENT RPAREN
+receive_stmt
+    ::= KW_RECEIVE LPAREN IDENT RPAREN
     ;
 
-assert_stmt
-    ::= KW_ASSERT expr
+verify_stmt
+    ::= KW_VERIFY expr
     ;
 
 ret_stmt
@@ -225,12 +225,12 @@ ret_stmt
     | KW_RET
     ;
 
-break_stmt
-    ::= KW_BREAK
+halt_stmt
+    ::= KW_HALT
     ;
 
-next_stmt
-    ::= KW_NEXT
+skip_stmt
+    ::= KW_SKIP
     ;
 ```
 
@@ -254,8 +254,8 @@ while_stmt
     ::= KW_WHILE expr KW_DO stmt_list KW_END
     ;
 
-loop_stmt
-    ::= KW_LOOP IDENT KW_IN expr DOTDOT expr opt_step KW_DO stmt_list KW_END
+orbit_stmt
+    ::= KW_ORBIT IDENT KW_IN expr DOTDOT expr opt_step KW_DO stmt_list KW_END
     ;
 
 opt_step
@@ -263,8 +263,8 @@ opt_step
     | /* empty */
     ;
 
-select_stmt
-    ::= KW_SELECT expr KW_DO case_list opt_default KW_END
+route_stmt
+    ::= KW_ROUTE expr KW_DO case_list opt_default KW_END
     ;
 
 case_list
@@ -302,7 +302,7 @@ expr
     | expr OP_NEQ expr
     | expr KW_AND expr
     | expr KW_OR expr
-    | function_call
+    | proc_call
     ;
 
 primary_expr
@@ -311,7 +311,7 @@ primary_expr
     | LPAREN expr RPAREN
     ;
 
-function_call
+proc_call
     ::= IDENT LPAREN opt_arg_list RPAREN
     ;
 
@@ -334,11 +334,3 @@ literal
     | KW_FALSE
     ;
 ```
-
----
-
-## 4. Conflict Resolution Analysis
-
-1. **Dangling Else**: Eliminated. Because all `if`, `elif`, and `else` blocks end with explicit `end`, the grammar provides unambiguous nesting with zero shift/reduce conflicts.
-2. **Statement Termination**: Statements with inner blocks (`if`, `while`, `loop`, `select`) terminate cleanly with `end`. Flat single-line statements terminate with `;`. This prevents lookahead ambiguity.
-3. **Expression vs Statement**: Function calls and assignments are strictly distinguished via `IDENT` followed by either `OP_ASSIGN` or `LPAREN`.

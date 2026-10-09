@@ -72,7 +72,7 @@ This document describes the internal architectural design, subsystem interfaces,
 - **`SourceLocation`**: Encapsulates filename, 1-indexed line, and 1-indexed column.
 - **`DiagnosticEngine`**: Standardizes error, warning, and note formatting:
   ```text
-  tests/semantic/invalid_assign.nova:12:5: error: cannot assign to immutable variable 'x'
+  tests/semantic/invalid_assign.nova:12:5: error: cannot assign to immutable constant 'x'
       x = 42;
       ^
   ```
@@ -80,39 +80,39 @@ This document describes the internal architectural design, subsystem interfaces,
 
 ### 2.2 Lexical Subsystem (`src/lexer/`)
 - Implemented via Flex (`scanner.l`) compiled to modern C++.
-- Encapsulates state within a scanner class or reentrant interface.
-- Tracks exact line and column numbers using custom actions.
-- Outputs `Token` structures containing token kind, semantic value (`std::string`, `int32_t`, etc.), and `SourceLocation`.
+- Encapsulates scanner state cleanly.
+- Tracks exact line and column numbers.
+- Emits `Token` structures containing token kind, semantic value, and `SourceLocation`.
 
 ### 2.3 Syntactic Subsystem (`src/parser/`)
 - Implemented via Bison (`parser.y`) generating a clean LALR(1) parser.
 - Pure parser action: directly constructs polymorphically typed AST nodes.
-- Integrates with the DiagnosticEngine for syntax error recovery and precise diagnostic reporting.
+- Integrates with DiagnosticEngine for syntax error recovery and precise diagnostic reporting.
 
 ### 2.4 Abstract Syntax Tree (`src/ast/`)
 - Abstract base class `ASTNode` with `SourceLocation`.
 - Hierarchical categories:
-  - `ProgramNode`: Root containing functions and entry block.
-  - `StatementNode`: `VarDeclNode`, `ValDeclNode`, `AssignNode`, `IfNode`, `WhileNode`, `LoopNode`, `SelectNode`, `EmitNode`, `ReadNode`, `AssertNode`, `RetNode`, etc.
-  - `ExpressionNode`: `BinaryExprNode`, `UnaryExprNode`, `LiteralNode`, `IdentifierNode`, `CallExprNode`.
+  - `ProgramNode`: Root containing procedures (`proc`) and execution capsule (`ignite`).
+  - `StatementNode`: `ConstDeclNode`, `FluxDeclNode`, `AssignNode`, `IfNode`, `WhileNode`, `OrbitNode`, `RouteNode`, `TransmitNode`, `ReceiveNode`, `VerifyNode`, `RetNode`, `HaltNode`, `SkipNode`.
+  - `ExpressionNode`: `BinaryExprNode`, `UnaryExprNode`, `LiteralNode`, `IdentifierNode`, `ProcCallNode`.
 - Implements the **Visitor Pattern** (`ASTVisitor`) to decouple AST representation from semantic analysis, printing, and IR emission passes.
 
 ### 2.5 Semantic Analysis Subsystem (`src/semantic/`)
-- **`Symbol`**: Stores identifier name, `Type`, mutability (`VAL` vs `VAR`), declaration `SourceLocation`, and memory offset/register id.
-- **`Scope`**: Lexical tree supporting lookup in current scope and parent scopes.
-- **`SymbolTable`**: Manages scope entry and exit, handles shadowing correctly, and rejects duplicate identifiers at the same scope depth.
-- **`TypeChecker`**: AST Visitor that inspects expression types, validates operator operand compatibility, ensures non-void functions return a matching value along all control paths, and validates loop bounds.
+- **`Symbol`**: Stores identifier name, `Type`, mutability (`CONST` vs `FLUX`), declaration `SourceLocation`, and memory offset.
+- **`Scope`**: Lexical tree supporting lookup in current and parent scopes.
+- **`SymbolTable`**: Manages scope entry and exit, handles shadowing, and rejects duplicate identifiers at the same scope depth.
+- **`TypeChecker`**: AST Visitor that inspects expression types, validates operator operand compatibility, ensures non-void procedures return a matching value along all control paths, and validates loop bounds.
 
 ### 2.6 Contract System (`src/contracts/`)
-- Encapsulates preconditions (`require`) and runtime assertions (`assert`).
-- **`ContractAnalyzer`**: Associates preconditions with function signatures and tracks invariants through sequential basic blocks.
+- Encapsulates preconditions (`require`) and runtime invariants (`verify`).
+- **`ContractAnalyzer`**: Associates preconditions with procedure signatures and tracks invariants through basic blocks.
 
 ### 2.7 Intermediate Representation Subsystem (`src/ir/`)
 - Three-Address Code (TAC) Quadruple representation:
   - `Quad`: Opcode, Argument 1, Argument 2, Result Destination.
-  - Op codes: `ADD`, `SUB`, `MUL`, `DIV`, `MOD`, `POW`, `CMP_LT`, `CMP_EQ`, `JUMP`, `JUMP_IF_FALSE`, `CALL`, `PARAM`, `RETURN`, `EMIT`, `READ`, `ASSERT`, `CONTRACT`.
+  - Op codes: `ADD`, `SUB`, `MUL`, `DIV`, `MOD`, `POW`, `CMP_LT`, `CMP_EQ`, `JUMP`, `JUMP_IF_FALSE`, `CALL`, `PARAM`, `RETURN`, `TRANSMIT`, `RECEIVE`, `VERIFY`, `CONTRACT`.
 - **`BasicBlock`**: Sequence of straight-line instructions ending with a branch or terminator.
-- **`ControlFlowGraph (CFG)`**: Graph of basic blocks per function and the `entry` routine.
+- **`ControlFlowGraph (CFG)`**: Graph of basic blocks per procedure and the `ignite` capsule.
 
 ### 2.8 Optimization Subsystem (`src/optimization/`)
 - **`ConstantPropagation`**: Propagates known scalar values through TAC basic blocks.
@@ -131,7 +131,7 @@ The compiler driver (`src/main.cpp`) exposes progressive pipeline inspection fla
 | `--tokens <file>` | Lex the file and print the token stream with locations |
 | `--ast <file>` | Parse the file and print the AST in indented tree format |
 | `--symbols <file>` | Perform semantic analysis and dump the symbol tables |
-| `--contracts <file>` | Inspect active contracts and function preconditions |
+| `--contracts <file>` | Inspect active contracts and procedure preconditions |
 | `--baseline-ir <file>` | Emit baseline TAC without contract optimizations |
 | `--ir <file>` | Emit contract-aware and optimized TAC |
 | `-o <output>` | Specify output target |
