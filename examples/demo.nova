@@ -1,0 +1,74 @@
+// ==============================================================================
+// NOVA Comprehensive Demonstration Program: Deep Space Telemetry Subsystem
+// Demonstrates all 34 reserved keywords across functions, types, and cycles.
+// ==============================================================================
+
+// Procedure with contract precondition and return value
+proc calibrate_sensor(sensor_id: i32, initial_bias: f32) -> f32 do
+    require sensor_id > 0 and initial_bias >= 0.0;
+    ret initial_bias + 0.05;
+end
+
+// Procedure returning void with precondition
+proc log_status(tag: str, code: char) -> void do
+    require tag != "";
+    transmit(tag);
+    transmit(code);
+    ret;
+end
+
+// Main Program Execution Capsule
+ignite do
+    // State Bindings (const: immutable, flux: mutable)
+    const mission_tag: str = "NOVA-DEEP-SPACE-1";
+    const status_code: char = 'A';
+    const max_cycles: i32 = 10;
+    
+    flux active: bool = true;
+    flux signal_lost: bool = false;
+    flux altitude: f32 = 450.2;
+    flux telemetry_channel: i32 = 101;
+    flux user_input: i32 = 0;
+
+    log_status(mission_tag, status_code);
+
+    // Invariant Verification Contract
+    verify active and not signal_lost;
+
+    // Counted Stepped Orbit Loop
+    orbit cycle in 1..max_cycles step 1 do
+        if cycle == 2 do
+            skip; // skip iteration 2
+        elif cycle == 8 do
+            halt; // halt loop early at cycle 8
+        else do
+            transmit("Executing orbital telemetry cycle:");
+            transmit(cycle);
+        end
+    end
+
+    // While Cycle with compound logical expressions
+    while active and (altitude > 100.0 or not signal_lost) do
+        altitude = altitude - 75.5;
+        if altitude <= 200.0 do
+            active = false;
+        end
+    end
+
+    // Signal Routing & Case Selection
+    route telemetry_channel do
+        case 101:
+            transmit("Transmitting over primary Deep Space transponder.");
+        case 202:
+            transmit("Transmitting over backup UHF antenna.");
+        default:
+            transmit("Unknown transponder frequency.");
+    end
+
+    // Telemetry I/O Operations
+    transmit("Awaiting ground station uplink input...");
+    receive(user_input);
+
+    verify user_input >= 0;
+    transmit("Mission telemetry sequence finalized.");
+end

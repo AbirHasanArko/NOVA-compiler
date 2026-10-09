@@ -63,13 +63,27 @@ test: $(TARGET)
 	@echo [TEST] Executing NOVA Test Suite...
 	$(PYTHON) scripts/test_runner.py
 
+counter: $(BIN_DIR)/keyword_counter
+
+$(BIN_DIR)/keyword_counter: tools/keyword_counter/counter.l | $(BIN_DIR)
+	@mkdir -p build/counter
+	@echo [FLEX] $<
+	$(FLEX_BIN) -o build/counter/counter.yy.c $<
+	@echo [CXX] build/counter/counter.yy.c
+	$(CXX) $(CXXFLAGS) -o $@ build/counter/counter.yy.c
+
+count-keywords: $(BIN_DIR)/keyword_counter
+	@$(BIN_DIR)/keyword_counter examples/demo.nova keyword_counts.txt
+
 clean:
 	@echo [CLEAN] Removing build artifacts...
-	@$(PYTHON) -c "import shutil, os, glob; [shutil.rmtree(d, ignore_errors=True) for d in ['build', 'bin']]; [os.remove(f) for f in ['src/lexer/lex.yy.c', 'src/lexer/lex.yy.cpp'] if os.path.exists(f)]; [os.remove(f) for f in glob.glob('nova*') if os.path.isfile(f) and not f.endswith('.cpp') and not f.endswith('.md')]"
+	@$(PYTHON) -c "import shutil, os, glob; [shutil.rmtree(d, ignore_errors=True) for d in ['build', 'bin']]; [os.remove(f) for f in ['src/lexer/lex.yy.c', 'src/lexer/lex.yy.cpp', 'keyword_counts.txt'] if os.path.exists(f)]; [os.remove(f) for f in glob.glob('nova*') if os.path.isfile(f) and not f.endswith('.cpp') and not f.endswith('.md')]"
 
 help:
 	@echo "Available make targets:"
-	@echo "  all     Build the NOVA compiler executable (default)"
-	@echo "  test    Run the test suite via scripts/test_runner.py"
-	@echo "  clean   Remove build objects and compiled binaries"
-	@echo "  help    Display this help information"
+	@echo "  all            Build the NOVA compiler executable (default)"
+	@echo "  counter        Build the standalone Flex keyword counter tool"
+	@echo "  count-keywords Run the keyword counter on examples/demo.nova"
+	@echo "  test           Run the test suite via scripts/test_runner.py"
+	@echo "  clean          Remove build objects and compiled binaries"
+	@echo "  help           Display this help information"
