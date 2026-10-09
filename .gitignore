@@ -1,0 +1,31 @@
+# Compiler build outputs
+bin/
+build/
+*.o
+*.obj
+*.exe
+nova
+nova.exe
+
+# Flex and Bison generated files
+src/lexer/lex.yy.cpp
+src/lexer/lex.yy.c
+src/parser/parser.tab.cpp
+src/parser/parser.tab.hpp
+src/parser/parser.tab.c
+src/parser/parser.tab.h
+src/parser/location.hh
+src/parser/position.hh
+src/parser/stack.hh
+
+# Test artifacts
+*.tmp
+*.out
+*.log
+tests/**/*.actual
+
+# Editor & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
