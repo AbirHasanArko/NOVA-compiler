@@ -9,7 +9,7 @@ This document defines the formal Context-Free Grammar (CFG) for the NOVA program
 ### 1.1 Keywords
 ```text
 KW_IGNITE     ::= "ignite"
-KW_PROC       ::= "proc"
+KW_ROUTINE    ::= "routine"
 KW_RET        ::= "ret"
 KW_CONST      ::= "const"
 KW_FLUX       ::= "flux"
@@ -73,6 +73,8 @@ SEMICOLON     ::= ";"
 COMMA         ::= ","
 LPAREN        ::= "("
 RPAREN        ::= ")"
+LBRACKET      ::= "["
+RBRACKET      ::= "]"
 ```
 
 ### 1.3 Literals & Identifiers
@@ -100,7 +102,7 @@ Precedence rules declared from lowest to highest:
 %left  OP_MUL OP_DIV OP_MOD
 %right UMINUS KW_NOT
 %right OP_POW
-%left  LPAREN
+%left  LPAREN LBRACKET
 ```
 
 ---
@@ -110,13 +112,13 @@ Precedence rules declared from lowest to highest:
 ### 3.1 Top-Level Program Structure
 ```bnf
 program
-    ::= proc_decl_list ignite_block
+    ::= routine_decl_list ignite_block
     | ignite_block
     ;
 
-proc_decl_list
-    ::= proc_decl_list proc_decl
-    | proc_decl
+routine_decl_list
+    ::= routine_decl_list routine_decl
+    | routine_decl
     ;
 
 ignite_block
@@ -124,10 +126,10 @@ ignite_block
     ;
 ```
 
-### 3.2 Procedures (`proc`)
+### 3.2 Routines (`routine`)
 ```bnf
-proc_decl
-    ::= KW_PROC IDENT LPAREN opt_param_list RPAREN opt_return_type KW_DO opt_require_list stmt_list KW_END
+routine_decl
+    ::= KW_ROUTINE IDENT LPAREN opt_param_list RPAREN opt_return_type KW_DO opt_require_list stmt_list KW_END
     ;
 
 opt_param_list
@@ -162,6 +164,11 @@ require_stmt
 ### 3.3 Types
 ```bnf
 type
+    ::= base_type
+    | base_type LBRACKET INT_LIT RBRACKET
+    ;
+
+base_type
     ::= KW_I32
     | KW_F32
     | KW_BOOL
@@ -202,6 +209,7 @@ declaration_stmt
 
 assignment_stmt
     ::= IDENT OP_ASSIGN expr
+    | postfix_expr LBRACKET expr RBRACKET OP_ASSIGN expr
     ;
 
 expr_stmt
@@ -209,7 +217,7 @@ expr_stmt
     ;
 
 transmit_stmt
-    ::= KW_TRANSMIT LPAREN expr RPAREN
+    ::= KW_TRANSMIT LPAREN expr_list RPAREN
     ;
 
 receive_stmt
@@ -285,7 +293,7 @@ opt_default
 ### 3.6 Expressions
 ```bnf
 expr
-    ::= primary_expr
+    ::= postfix_expr
     | expr OP_POW expr
     | OP_SUB expr %prec UMINUS
     | KW_NOT expr
@@ -302,27 +310,42 @@ expr
     | expr OP_NEQ expr
     | expr KW_AND expr
     | expr KW_OR expr
-    | proc_call
+    ;
+
+postfix_expr
+    ::= primary_expr
+    | postfix_expr LBRACKET expr RBRACKET
+    | routine_call
+    ;
+
+routine_call
+    ::= IDENT LPAREN opt_arg_list RPAREN
     ;
 
 primary_expr
     ::= IDENT
     | literal
+    | array_literal
     | LPAREN expr RPAREN
     ;
 
-proc_call
-    ::= IDENT LPAREN opt_arg_list RPAREN
+array_literal
+    ::= LBRACKET opt_expr_list RBRACKET
     ;
 
-opt_arg_list
-    ::= arg_list
+opt_expr_list
+    ::= expr_list
     | /* empty */
     ;
 
-arg_list
-    ::= arg_list COMMA expr
+expr_list
+    ::= expr_list COMMA expr
     | expr
+    ;
+
+opt_arg_list
+    ::= expr_list
+    | /* empty */
     ;
 
 literal

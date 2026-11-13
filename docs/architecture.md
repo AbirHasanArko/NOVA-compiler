@@ -92,27 +92,27 @@ This document describes the internal architectural design, subsystem interfaces,
 ### 2.4 Abstract Syntax Tree (`src/ast/`)
 - Abstract base class `ASTNode` with `SourceLocation`.
 - Hierarchical categories:
-  - `ProgramNode`: Root containing procedures (`proc`) and execution capsule (`ignite`).
+  - `ProgramNode`: Root containing routines (`routine`) and execution capsule (`ignite`).
   - `StatementNode`: `ConstDeclNode`, `FluxDeclNode`, `AssignNode`, `IfNode`, `WhileNode`, `OrbitNode`, `RouteNode`, `TransmitNode`, `ReceiveNode`, `VerifyNode`, `RetNode`, `HaltNode`, `SkipNode`.
-  - `ExpressionNode`: `BinaryExprNode`, `UnaryExprNode`, `LiteralNode`, `IdentifierNode`, `ProcCallNode`.
+  - `ExpressionNode`: `BinaryExprNode`, `UnaryExprNode`, `LiteralNode`, `IdentifierNode`, `RoutineCallNode`, `ArrayLiteralNode`, `IndexAccessNode`.
 - Implements the **Visitor Pattern** (`ASTVisitor`) to decouple AST representation from semantic analysis, printing, and IR emission passes.
 
 ### 2.5 Semantic Analysis Subsystem (`src/semantic/`)
-- **`Symbol`**: Stores identifier name, `Type`, mutability (`CONST` vs `FLUX`), declaration `SourceLocation`, and memory offset.
+- **`Symbol`**: Stores identifier name, `Type` (primitive or array `T[N]`), mutability (`CONST` vs `FLUX`), declaration `SourceLocation`, and memory offset.
 - **`Scope`**: Lexical tree supporting lookup in current and parent scopes.
 - **`SymbolTable`**: Manages scope entry and exit, handles shadowing, and rejects duplicate identifiers at the same scope depth.
-- **`TypeChecker`**: AST Visitor that inspects expression types, validates operator operand compatibility, ensures non-void procedures return a matching value along all control paths, and validates loop bounds.
+- **`TypeChecker`**: AST Visitor that inspects expression types, validates operator operand compatibility, ensures non-void routines return a matching value along all control paths, checks array bounds and mutability, and validates loop bounds.
 
 ### 2.6 Contract System (`src/contracts/`)
 - Encapsulates preconditions (`require`) and runtime invariants (`verify`).
-- **`ContractAnalyzer`**: Associates preconditions with procedure signatures and tracks invariants through basic blocks.
+- **`ContractAnalyzer`**: Associates preconditions with routine signatures and tracks invariants through basic blocks.
 
 ### 2.7 Intermediate Representation Subsystem (`src/ir/`)
 - Three-Address Code (TAC) Quadruple representation:
   - `Quad`: Opcode, Argument 1, Argument 2, Result Destination.
-  - Op codes: `ADD`, `SUB`, `MUL`, `DIV`, `MOD`, `POW`, `CMP_LT`, `CMP_EQ`, `JUMP`, `JUMP_IF_FALSE`, `CALL`, `PARAM`, `RETURN`, `TRANSMIT`, `RECEIVE`, `VERIFY`, `CONTRACT`.
+  - Op codes: `ADD`, `SUB`, `MUL`, `DIV`, `MOD`, `POW`, `CMP_LT`, `CMP_EQ`, `JUMP`, `JUMP_IF_FALSE`, `CALL`, `PARAM`, `RETURN`, `TRANSMIT`, `RECEIVE`, `VERIFY`, `CONTRACT`, `INDEX_LOAD`, `INDEX_STORE`.
 - **`BasicBlock`**: Sequence of straight-line instructions ending with a branch or terminator.
-- **`ControlFlowGraph (CFG)`**: Graph of basic blocks per procedure and the `ignite` capsule.
+- **`ControlFlowGraph (CFG)`**: Graph of basic blocks per routine and the `ignite` capsule.
 
 ### 2.8 Optimization Subsystem (`src/optimization/`)
 - **`ConstantPropagation`**: Propagates known scalar values through TAC basic blocks.

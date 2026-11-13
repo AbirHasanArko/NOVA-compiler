@@ -100,7 +100,7 @@ For positive tests:
 // EXPECT_OUT: 120
 // EXIT_CODE: 0
 
-proc factorial(n: i32) -> i32 do
+routine factorial(n: i32) -> i32 do
     if n <= 1 do
         ret 1;
     end

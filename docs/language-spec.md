@@ -11,7 +11,7 @@
 
 NOVA is a statically typed, compiled programming language designed with a **cosmic telemetry & systems computing** aesthetic. It blends futuristic, high-tech syntax with solid, unambiguous compiler theory:
 - **`ignite do ... end`**: Explicit root execution capsule.
-- **`proc`**: High-efficiency procedural routines with explicit contracts.
+- **`routine`**: High-efficiency procedural routines with explicit contracts.
 - **`const` / `flux`**: Explicit state classification (immutable vs. mutable/dynamic).
 - **`orbit`**: Deterministic stepped loop cycles.
 - **`transmit` / `receive`**: Telemetry-styled streams for standard I/O.
@@ -39,7 +39,7 @@ The following tokens are reserved keywords:
 
 | Category | Keywords |
 |---|---|
-| Execution Capsule | `ignite`, `do`, `end`, `proc`, `ret` |
+| Execution Capsule | `ignite`, `do`, `end`, `routine`, `ret` |
 | State Binding | `const` (immutable), `flux` (mutable) |
 | Primitive Types | `i32`, `f32`, `bool`, `char`, `str`, `void` |
 | Control Flow | `detect`, `redetect`, `fallback`, `route`, `case`, `default` |
@@ -69,7 +69,7 @@ The following tokens are reserved keywords:
 
 NOVA is strictly and statically typed. No implicit type promotions or coercions are permitted.
 
-### 3.1 Built-in Types
+### 3.1 Built-in Primitive Types
 1. **`i32`**: 32-bit signed two's complement integer.
 2. **`f32`**: 32-bit IEEE 754 single-precision float.
 3. **`bool`**: Boolean logical value (`true`, `false`).
@@ -77,11 +77,31 @@ NOVA is strictly and statically typed. No implicit type promotions or coercions 
 5. **`str`**: Immutable UTF-8 string literal or sequence.
 6. **`void`**: Unit type representing the absence of return data.
 
-### 3.2 Compatibility Rules
+### 3.2 Compound Types: Fixed-Size Arrays (`T[N]`)
+Arrays are contiguous, fixed-capacity sequences of homogeneous elements:
+- **Type Syntax**: `T[N]`, where `T` is any valid base type (`i32`, `f32`, `bool`, `char`, `str`) and `N` is an integer constant literal specifying capacity (`N > 0`).
+  ```nova
+  const sensor_readings: i32[4] = [10, 20, 30, 40];
+  flux telemetry_channels: f32[2] = [101.5, 202.8];
+  ```
+- **Array Literals**: Bracket-enclosed, comma-separated element lists: `[e0, e1, ..., eN-1]`.
+  All elements must evaluate to the same type `T`.
+- **Indexing & Element Access**: Zero-indexed bracket notation `arr[index]`, where `index` must evaluate to `i32`.
+  Valid index bounds are `0 <= index < N`.
+- **Element Mutation**: Array elements can be mutated only if the array was declared with `flux`:
+  ```nova
+  flux buffer: i32[3] = [0, 0, 0];
+  buffer[1] = 42; // Valid: buffer is flux
+  ```
+  Modifying elements of an array bound with `const` is a compile-time semantic error.
+- **Bounds Safety**: Out-of-bounds constant indices are rejected at compile time. Dynamic indices undergo bounds verification.
+
+### 3.3 Compatibility Rules
 - Arithmetic binary operations (`+`, `-`, `*`, `/`, `%`, `**`) require identical numeric types on both sides. Modulo `%` requires `i32`.
 - Relational operators (`<`, `<=`, `>`, `>=`) require identical numeric types and yield `bool`.
 - Equality operators (`==`, `!=`) operate on matching types and yield `bool`.
 - Logical operators (`and`, `or`, `not`) strictly accept and yield `bool`.
+- Array type compatibility requires both identical element type `T` and matching length `N`.
 
 ---
 
@@ -128,10 +148,10 @@ Precedence levels from highest to lowest:
 ## 6. Statements & Control Flow
 
 ### 6.1 Program Structure
-A NOVA program consists of zero or more top-level procedure declarations followed by the mandatory execution capsule `ignite`:
+A NOVA program consists of zero or more top-level routine declarations followed by the mandatory execution capsule `ignite`:
 
 ```nova
-proc calculate_thrust(mass: f32, accel: f32) -> f32 do
+routine calculate_thrust(mass: f32, accel: f32) -> f32 do
     require mass > 0.0;
     ret mass * accel;
 end
@@ -139,7 +159,7 @@ end
 ignite do
     const payload: f32 = 1200.0;
     flux thrust: f32 = calculate_thrust(payload, 9.8);
-    transmit(thrust);
+    transmit("Calculated thrust: ", thrust, " N");
 end
 ```
 
@@ -191,20 +211,20 @@ end
 
 ---
 
-## 7. Procedures (`proc`)
+## 7. Routines (`routine`)
 
 ### 7.1 Syntax
 ```nova
-proc <name>(<param1>: <type1>, <param2>: <type2>) -> <return_type> do
+routine <name>(<param1>: <type1>, <param2>: <type2>) -> <return_type> do
     opt_require_contracts;
-    // procedure body
+    // routine body
     ret <expression>;
 end
 ```
-For void procedures:
+For void routines:
 ```nova
-proc <name>(<param1>: <type1>) do
-    // procedure body
+routine <name>(<param1>: <type1>) do
+    // routine body
     ret; // optional
 end
 ```
@@ -215,9 +235,26 @@ end
 
 ### 8.1 Transmission (`transmit`)
 ```nova
-transmit(<expression>);
+transmit(<expr1> [, <expr2>, ...]);
 ```
-Outputs `<expression>` to standard output followed by a newline.
+Outputs one or more comma-separated expressions sequentially to standard output, terminating with a newline (`\n`).
+
+- **Universal Type Support**: `transmit` directly prints variables (`flux`), constants (`const`), literals, and expressions of all NOVA types:
+  - `i32`: Decimal integer value (e.g., `42`).
+  - `f32`: Single-precision floating-point value (e.g., `3.141500`).
+  - `bool`: `"true"` or `"false"`.
+  - `char`: The character byte (e.g., `'X'`).
+  - `str`: String sequence (e.g., `"Sensor calibration complete"`).
+  - `T[N]`: Formatted array representation: `[v0, v1, ..., vN-1]`.
+- **Examples**:
+  ```nova
+  const tag: str = "ALTITUDE";
+  flux alt: f32 = 1205.75;
+  const flags: bool[2] = [true, false];
+  
+  transmit(tag, ": ", alt, " m | status: ", flags);
+  // Output: ALTITUDE: 1205.750000 m | status: [true, false]
+  ```
 
 ### 8.2 Reception (`receive`)
 ```nova
@@ -237,9 +274,10 @@ Evaluates `<condition>` (`bool`). If `false`, runtime halts immediately with an 
 
 ### 9.2 Precondition Requirements (`require`)
 ```nova
-proc orbital_velocity(r: f32) -> f32 do
+routine orbital_velocity(r: f32) -> f32 do
     require r > 0.0;
     ret 398600.4 / r;
 end
 ```
-Checked immediately upon procedure invocation.
+Checked immediately upon routine invocation.
+
