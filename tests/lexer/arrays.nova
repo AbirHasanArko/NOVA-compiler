@@ -1,0 +1,9 @@
+// TEST: tests/lexer/arrays.nova
+// KIND: PASS
+// FLAGS: --tokens
+// EXPECT_OUT: LBRACKET
+// EXIT_CODE: 0
+
+const buffer: i32[4] = [10, 20, 30, 40];
+flux matrix: f32[2] = [1.5, 2.5];
+buffer[0] = 99;

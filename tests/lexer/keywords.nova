@@ -5,7 +5,7 @@
 // EXIT_CODE: 0
 
 ignite do end
-proc ret
+routine ret
 const flux
 i32 f32 bool char str void
 detect redetect fallback

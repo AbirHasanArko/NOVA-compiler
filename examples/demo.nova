@@ -3,17 +3,16 @@
 // Demonstrates all 34 reserved keywords across functions, types, and cycles.
 // ==============================================================================
 
-// Procedure with contract precondition and return value
-proc calibrate_sensor(sensor_id: i32, initial_bias: f32) -> f32 do
+// Routine with contract precondition and return value
+routine calibrate_sensor(sensor_id: i32, initial_bias: f32) -> f32 do
     require sensor_id > 0 and initial_bias >= 0.0;
     ret initial_bias + 0.05;
 end
 
-// Procedure returning void with precondition
-proc log_status(tag: str, code: char) -> void do
+// Routine returning void with precondition
+routine log_status(tag: str, code: char) -> void do
     require tag != "";
-    transmit(tag);
-    transmit(code);
+    transmit(tag, " [CODE: ", code, "]");
     ret;
 end
 
@@ -23,13 +22,16 @@ ignite do
     const mission_tag: str = "NOVA-DEEP-SPACE-1";
     const status_code: char = 'A';
     const max_cycles: i32 = 10;
+    const thresholds: f32[3] = [10.5, 20.0, 35.8];
     
     flux active: bool = true;
     flux signal_lost: bool = false;
     flux altitude: f32 = 450.2;
     flux telemetry_channel: i32 = 101;
     flux user_input: i32 = 0;
+    flux sensor_readings: i32[4] = [0, 0, 0, 0];
 
+    sensor_readings[0] = 42;
     log_status(mission_tag, status_code);
 
     // Invariant Verification Contract
@@ -42,8 +44,7 @@ ignite do
         redetect cycle == 8 do
             halt; // halt loop early at cycle 8
         fallback do
-            transmit("Executing orbital telemetry cycle:");
-            transmit(cycle);
+            transmit("Executing orbital telemetry cycle: ", cycle);
         end
     end
 
@@ -70,5 +71,5 @@ ignite do
     receive(user_input);
 
     verify user_input >= 0;
-    transmit("Mission telemetry sequence finalized.");
+    transmit("Telemetry complete. Sensor array: ", sensor_readings, " Thresholds: ", thresholds);
 end

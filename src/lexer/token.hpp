@@ -11,11 +11,11 @@ enum class TokenKind {
     TOKEN_EOF,
     TOKEN_ERROR,
 
-    // Execution Capsule & Procedures
+    // Execution Capsule & Routines
     KW_IGNITE,
     KW_DO,
     KW_END,
-    KW_PROC,
+    KW_ROUTINE,
     KW_RET,
 
     // State Bindings
@@ -118,7 +118,7 @@ inline const char* token_kind_to_string(TokenKind kind) {
         case TokenKind::KW_IGNITE:     return "KW_IGNITE";
         case TokenKind::KW_DO:         return "KW_DO";
         case TokenKind::KW_END:        return "KW_END";
-        case TokenKind::KW_PROC:       return "KW_PROC";
+        case TokenKind::KW_ROUTINE:    return "KW_ROUTINE";
         case TokenKind::KW_RET:        return "KW_RET";
         case TokenKind::KW_CONST:      return "KW_CONST";
         case TokenKind::KW_FLUX:       return "KW_FLUX";

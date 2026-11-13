@@ -31,12 +31,12 @@ static KeywordEntry g_keywords[] = {
     {"not", 0},
     {"orbit", 0},
     {"or", 0},
-    {"proc", 0},
     {"receive", 0},
     {"redetect", 0},
     {"require", 0},
     {"ret", 0},
     {"route", 0},
+    {"routine", 0},
     {"skip", 0},
     {"step", 0},
     {"str", 0},
@@ -81,7 +81,7 @@ static void record_keyword(const char* name) {
 
     /* NOVA Reserved Keywords */
 "ignite"            { record_keyword("ignite"); }
-"proc"              { record_keyword("proc"); }
+"routine"           { record_keyword("routine"); }
 "ret"               { record_keyword("ret"); }
 "const"             { record_keyword("const"); }
 "flux"              { record_keyword("flux"); }

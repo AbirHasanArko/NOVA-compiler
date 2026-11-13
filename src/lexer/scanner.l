@@ -87,7 +87,7 @@ static Token make_error(const std::string& msg) {
 "ignite"        { return make_token(TokenKind::KW_IGNITE); }
 "do"            { return make_token(TokenKind::KW_DO); }
 "end"           { return make_token(TokenKind::KW_END); }
-"proc"          { return make_token(TokenKind::KW_PROC); }
+"routine"       { return make_token(TokenKind::KW_ROUTINE); }
 "ret"           { return make_token(TokenKind::KW_RET); }
 "const"         { return make_token(TokenKind::KW_CONST); }
 "flux"          { return make_token(TokenKind::KW_FLUX); }

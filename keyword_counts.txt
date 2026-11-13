@@ -3,7 +3,7 @@
 ==================================================
 Source File   : examples/demo.nova
 Unique Found  : 34 / 34 keywords
-Total Occurred: 82 times
+Total Occurred: 84 times
 --------------------------------------------------
 KEYWORD          COUNT
 --------------------------------------------------
@@ -11,33 +11,33 @@ and              3
 bool             2
 case             2
 char             2
-const            3
+const            4
 cruise           1
 default          1
 detect           2
 do               10
 end              8
-f32              3
+f32              4
 fallback         1
 false            2
-flux             5
+flux             6
 halt             1
-i32              4
+i32              5
 ignite           1
 in               1
 not              2
 orbit            1
 or               1
-proc             2
 receive          1
 redetect         1
 require          2
 ret              2
 route            1
+routine          2
 skip             1
 step             1
 str              2
-transmit         9
+transmit         7
 true             1
 verify           2
 void             1
