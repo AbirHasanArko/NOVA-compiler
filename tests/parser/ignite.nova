@@ -1,0 +1,10 @@
+// TEST: tests/parser/ignite.nova
+// KIND: PASS
+// FLAGS: --parse
+// EXPECT_OUT: Syntax check passed
+// EXIT_CODE: 0
+
+ignite do
+    transmit("NOVA Telemetry Online.");
+end
+

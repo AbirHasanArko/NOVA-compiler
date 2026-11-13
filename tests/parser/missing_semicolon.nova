@@ -1,0 +1,11 @@
+// TEST: tests/parser/missing_semicolon.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --parse
+// EXPECT_ERR: syntax error:
+// EXIT_CODE: 1
+
+ignite do
+    const x: i32 = 10
+    transmit(x);
+end
+

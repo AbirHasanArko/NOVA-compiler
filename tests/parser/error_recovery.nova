@@ -1,0 +1,12 @@
+// TEST: tests/parser/error_recovery.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --parse
+// EXPECT_ERR: syntax error:
+// EXIT_CODE: 1
+
+ignite do
+    const = 1;
+    const valid: i32 = 2;
+    flux = 3;
+end
+

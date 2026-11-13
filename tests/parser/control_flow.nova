@@ -1,0 +1,43 @@
+// TEST: tests/parser/control_flow.nova
+// KIND: PASS
+// FLAGS: --parse
+// EXPECT_OUT: Syntax check passed
+// EXIT_CODE: 0
+
+routine noop() do
+end
+
+ignite do
+    const a: i32 = 2;
+    const b: i32 = 3;
+    flux x: i32 = -a ** b;
+    flux ok: bool = not false and (a < b or x == -8);
+
+    detect x < 0 do
+        orbit i in 0..10 step 2 do
+            detect i == 4 do
+                skip;
+            redetect i == 8 do
+                halt;
+            fallback do
+                transmit("orbit i=", i);
+            end
+        end
+    redetect x == 0 do
+        cruise ok do
+            ok = false;
+        end
+    fallback do
+        noop();
+    end
+
+    route a do
+        case 1:
+            transmit('A');
+        case 2:
+            transmit('B');
+        default:
+            transmit('?');
+    end
+end
+

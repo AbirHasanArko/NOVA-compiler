@@ -1,0 +1,31 @@
+// TEST: tests/parser/routines_and_arrays.nova
+// KIND: PASS
+// FLAGS: --parse
+// EXPECT_OUT: Syntax check passed
+// EXIT_CODE: 0
+
+routine calibrate(id: i32, bias: f32) -> f32 do
+    require id > 0;
+    require bias >= 0.0;
+    ret bias + 0.05;
+end
+
+routine log_packet(header: str, values: i32[4]) -> void do
+    transmit(header, ": ", values, " status=", true);
+    ret;
+end
+
+ignite do
+    const thresholds: f32[3] = [10.5, 20.0, 35.8];
+    flux readings: i32[4] = [1, 2, 3, 4];
+    flux sample: i32;
+
+    readings[0] = 42;
+    sample = readings[1 + 1];
+    receive(sample);
+    verify sample >= 0;
+
+    log_packet("TELEMETRY", readings);
+    transmit("First threshold=", thresholds[0], " calibrated=", calibrate(1, 0.5));
+end
+

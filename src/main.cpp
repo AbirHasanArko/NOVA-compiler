@@ -1,4 +1,5 @@
 #include "lexer/lexer.hpp"
+#include "parser/parser.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -22,6 +23,7 @@ void print_help(const std::string& program_name) {
     std::cout << "  -v, --version           Display compiler version and exit\n\n";
     std::cout << "Pipeline Inspection Flags:\n";
     std::cout << "  --tokens <file>         Lexical analysis: scan and dump token stream\n";
+    std::cout << "  --parse <file>          Syntax analysis: parse and verify grammar\n";
     std::cout << "  --ast <file>            Syntax analysis: parse and dump AST\n";
     std::cout << "  --symbols <file>        Semantic analysis: validate and dump symbol tables\n";
     std::cout << "  --contracts <file>      Verification: inspect active contracts & preconditions\n";
@@ -33,6 +35,7 @@ void print_help(const std::string& program_name) {
 enum class Mode {
     Compile,
     Tokens,
+    Parse,
     AST,
     Symbols,
     Contracts,
@@ -75,6 +78,15 @@ CompilerOptions parse_args(int argc, char* argv[]) {
             } else {
                 options.has_error = true;
                 options.error_message = "error: '--tokens' requires a source file path.";
+                return options;
+            }
+        } else if (arg == "--parse") {
+            options.mode = Mode::Parse;
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                options.input_file = argv[++i];
+            } else {
+                options.has_error = true;
+                options.error_message = "error: '--parse' requires a source file path.";
                 return options;
             }
         } else if (arg == "--ast") {
@@ -193,6 +205,17 @@ int main(int argc, char* argv[]) {
             }
             return 0;
         }
+        case nova::Mode::Parse: {
+            nova::Parser parser(options.input_file);
+            if (!parser.parse()) {
+                for (const auto& err : parser.errors()) {
+                    std::cerr << err << "\n";
+                }
+                return 1;
+            }
+            std::cout << "[NOVA Parser]: Syntax check passed for '" << options.input_file << "'.\n";
+            return 0;
+        }
         case nova::Mode::AST:
             std::cout << "[NOVA Phase 4 AST]: AST dump will be implemented in Phase 4 for: " << options.input_file << "\n";
             break;
@@ -208,9 +231,17 @@ int main(int argc, char* argv[]) {
         case nova::Mode::IR:
             std::cout << "[NOVA Phase 16 IR]: Optimized IR will be implemented in Phase 16 for: " << options.input_file << "\n";
             break;
-        case nova::Mode::Compile:
+        case nova::Mode::Compile: {
+            nova::Parser parser(options.input_file);
+            if (!parser.parse()) {
+                for (const auto& err : parser.errors()) {
+                    std::cerr << err << "\n";
+                }
+                return 1;
+            }
             std::cout << "[NOVA Compiler]: Compiling " << options.input_file << " ...\n";
             break;
+        }
         default:
             break;
     }

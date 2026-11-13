@@ -7,8 +7,9 @@ export PATH := C:/msys64/usr/bin:C:/msys64/ucrt64/bin:$(PATH)
 CXX ?= g++
 CXXFLAGS ?= -std=c++17 -Wall -Wextra -pedantic -Isrc
 
-# Path resolution for Flex
+# Path resolution for Flex and Bison
 FLEX_BIN := $(shell which flex 2>/dev/null || echo C:/msys64/usr/bin/flex.exe)
+BISON_BIN := $(shell which bison 2>/dev/null || echo C:/msys64/usr/bin/bison.exe)
 PYTHON ?= python
 
 # Use MSYS2 sh for POSIX consistency if present
@@ -23,8 +24,8 @@ BUILD_DIR := build
 BIN_DIR := bin
 
 # Source and Object files
-GEN_SRCS := src/lexer/lex.yy.c
-OBJS := $(BUILD_DIR)/main.o $(BUILD_DIR)/lexer/lexer.o $(BUILD_DIR)/lexer/lex.yy.o
+GEN_SRCS := src/lexer/lex.yy.c src/parser/parser.tab.cpp src/parser/parser.tab.hpp
+OBJS := $(BUILD_DIR)/main.o $(BUILD_DIR)/lexer/lexer.o $(BUILD_DIR)/lexer/lex.yy.o $(BUILD_DIR)/parser/parser.o $(BUILD_DIR)/parser/parser.tab.o
 
 .PHONY: all clean test help
 
@@ -40,6 +41,16 @@ src/lexer/lex.yy.c: src/lexer/scanner.l
 	@mkdir -p src/lexer
 	@echo [FLEX] $<
 	$(FLEX_BIN) -o $@ $<
+
+# Bison generation rule (producing parser.tab.cpp & parser.tab.hpp)
+src/parser/parser.tab.cpp src/parser/parser.tab.hpp: src/parser/parser.y
+	@mkdir -p src/parser
+	@echo [BISON] $<
+	$(BISON_BIN) -Wall -d -o src/parser/parser.tab.cpp $<
+
+# Generated header dependencies
+$(BUILD_DIR)/parser/parser.o: src/parser/parser.cpp src/parser/parser.tab.hpp
+$(BUILD_DIR)/parser/parser.tab.o: src/parser/parser.tab.cpp src/parser/parser.tab.hpp
 
 # C++ Compilation rule for standard .cpp sources
 $(BUILD_DIR)/%.o: src/%.cpp | $(BUILD_DIR)
@@ -77,7 +88,7 @@ count-keywords: $(BIN_DIR)/keyword_counter
 
 clean:
 	@echo [CLEAN] Removing build artifacts...
-	@$(PYTHON) -c "import shutil, os, glob; [shutil.rmtree(d, ignore_errors=True) for d in ['build', 'bin']]; [os.remove(f) for f in ['src/lexer/lex.yy.c', 'src/lexer/lex.yy.cpp', 'keyword_counts.txt'] if os.path.exists(f)]; [os.remove(f) for f in glob.glob('nova*') if os.path.isfile(f) and not f.endswith('.cpp') and not f.endswith('.md')]"
+	@$(PYTHON) -c "import shutil, os, glob; [shutil.rmtree(d, ignore_errors=True) for d in ['build', 'bin']]; [os.remove(f) for f in ['src/lexer/lex.yy.c', 'src/lexer/lex.yy.cpp', 'src/parser/parser.tab.cpp', 'src/parser/parser.tab.hpp', 'keyword_counts.txt'] if os.path.exists(f)]; [os.remove(f) for f in glob.glob('nova*') if os.path.isfile(f) and not f.endswith('.cpp') and not f.endswith('.md')]"
 
 help:
 	@echo "Available make targets:"

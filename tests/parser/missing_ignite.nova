@@ -1,0 +1,10 @@
+// TEST: tests/parser/missing_ignite.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --parse
+// EXPECT_ERR: syntax error:
+// EXIT_CODE: 1
+
+routine helper() -> i32 do
+    ret 1;
+end
+
