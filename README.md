@@ -3,7 +3,7 @@
 > **NOVA**: A compiled, statically-typed programming language engineered with a **Cosmic Telemetry & Systems Computing** aesthetic. Built with Flex, Bison, and C++17.
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Phase](https://img.shields.io/badge/phase-Phase%204%20Complete-blue)](#)
+[![Phase](https://img.shields.io/badge/phase-Phase%205%20Complete-blue)](#)
 [![License](https://img.shields.io/badge/license-MIT-informational)](#)
 
 ---
@@ -65,7 +65,8 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
 | **Phase 2: Flex Lexer** | Completed | Token model, Flex scanner, C++ token stream driver, `--tokens` flag, demo program, keyword counter, editor extension, and lexer tests. |
 | **Phase 3: Bison Parser** | Completed | Pure reentrant LALR(1) Bison parser (`0` conflicts), statement-level error recovery, `--parse` flag, and parser test suite. |
 | **Phase 4: Abstract Syntax Tree (AST)** | Completed | Polymorphic AST node hierarchy (24 concrete nodes), `ASTVisitor`, `ASTPrinter`, Bison AST construction, `--ast` flag, and AST tests. |
-| **Phase 5: Expressions & Precedence** | Next | Deep expression AST verification, operator precedence boundary tests, and shift/reduce validation. |
+| **Phase 5: Expressions & Precedence** | Completed | Verified 9-level operator precedence, associativity (`**`, unary `-`/`not`, arithmetic, comparison, logical), array indexing, and complex equations. |
+| **Phase 6: Variables & Symbol Table** | Next | Lexical scoping, symbol resolution, `const` immutability, `flux` mutability, and `--symbols` dump. |
 
 ### Phase-by-Phase Files & Verification Log
 
@@ -103,6 +104,13 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
   - Valid AST structure tests: [`declarations.nova`](tests/ast/declarations.nova), [`expressions.nova`](tests/ast/expressions.nova), [`control_flow.nova`](tests/ast/control_flow.nova)
   - Negative AST error handling test: [`invalid_syntax.nova`](tests/ast/invalid_syntax.nova)
 - **Result**: Zero Bison conflicts (`-Wall`) and leak-free `%destructor` cleanup on syntax errors; **4 / 4** AST tests passing (`3 PASS`, `1 EXPECTED ERROR`), [`examples/demo.nova`](examples/demo.nova) dumps full AST cleanly via `--ast`, cumulative suite **29 / 29** passing (`17 PASS`, `12 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
+
+#### Phase 5 — Expressions & Precedence
+- **Verified Grammar & Precedence Specification**: Audited all 9 precedence levels and shift/reduce conflict resolutions (`--report=all` via Bison `-Wall -Wcounterexamples`) in [`src/parser/parser.y`](src/parser/parser.y) against [`docs/language-spec.md`](docs/language-spec.md).
+- **Test Files** (5 files in [`tests/expressions/`](tests/expressions/)):
+  - Precedence & associativity tests: [`arithmetic_associativity.nova`](tests/expressions/arithmetic_associativity.nova), [`unary_and_power.nova`](tests/expressions/unary_and_power.nova), [`boolean_and_comparison.nova`](tests/expressions/boolean_and_comparison.nova), [`complex_equations_and_indexing.nova`](tests/expressions/complex_equations_and_indexing.nova)
+  - Negative expression diagnostic test: [`invalid_expressions.nova`](tests/expressions/invalid_expressions.nova)
+- **Result**: Verified right-associative `**`, `-a ** b` (`-(a ** b)`), left-associative arithmetic/relational/equality/logical operators, parenthesized overrides, routine calls, and chained indexing; **5 / 5** expression tests passing (`4 PASS`, `1 EXPECTED ERROR`), cumulative suite **34 / 34** passing (`21 PASS`, `13 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
 
 ---
 
@@ -209,7 +217,7 @@ The test harness [`scripts/test_runner.py`](scripts/test_runner.py) strictly val
 make test
 ```
 
-Current test coverage: **29 / 29 tests passing** (`17 PASS`, `12 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, and AST construction/printing.
+Current test coverage: **34 / 34 tests passing** (`21 PASS`, `13 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, AST construction, and full 9-level expression precedence.
 
 ---
 
@@ -388,7 +396,8 @@ NOVA-Compiler/
 │   ├── cli/                      # CLI driver verification tests
 │   ├── lexer/                    # Comprehensive tokenization test cases
 │   ├── parser/                   # Syntactic validity & diagnostic tests
-│   └── ast/                      # AST construction & dump tests
+│   ├── ast/                      # AST construction & dump tests
+│   └── expressions/              # Precedence, associativity & equation tests
 ├── examples/                     # Demonstration programs
 │   └── demo.nova                 # Full demo exercising all 34 keywords
 ├── tools/                        # Utility programs
@@ -410,7 +419,7 @@ NOVA-Compiler/
 
 - [x] **Phase 3: Bison Parser** — Core parser productions (`ignite do ... end`, `routine`, `T[N]`, multi-arg `transmit`), syntax recovery, and diagnostic source locations.
 - [x] **Phase 4: Abstract Syntax Tree (AST)** — Polymorphic AST hierarchy (`ASTNode`, `ASTVisitor`, `--ast`).
-- [ ] **Phase 5: Expressions & Precedence** — Operator hierarchy and shift/reduce resolution.
+- [x] **Phase 5: Expressions & Precedence** — Operator hierarchy and shift/reduce resolution.
 - [ ] **Phase 6: Variables & Symbol Table** — Scoping depth, `const` immutability, `flux` tracking.
 - [ ] **Phase 7: Type Checking** — Static type enforcement for `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` arrays.
 - [ ] **Phase 8: Control Flow Semantics** — Branch and loop validation.

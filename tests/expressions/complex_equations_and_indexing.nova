@@ -1,0 +1,30 @@
+// TEST: tests/expressions/complex_equations_and_indexing.nova
+// KIND: PASS
+// FLAGS: --ast
+// EXPECT_OUT: RoutineCall scale
+// EXPECT_OUT: IndexAccess
+// EXPECT_OUT: BinaryExpr (/)
+// EXPECT_OUT: BinaryExpr (**)
+// EXIT_CODE: 0
+
+routine scale(val: i32, exp: i32) -> i32 do
+    ret val * exp;
+end
+
+ignite do
+    const v0: f32 = 12.5;
+    const a: f32 = 9.8;
+    const t: f32 = 4.0;
+    const s0: f32 = 0.0;
+    const s1: f32 = 100.0;
+
+    const kinematics: f32 = ((v0 + a * t) ** 2.0 - v0 ** 2.0) / (2.0 * (s1 - s0));
+
+    const weights: i32[3] = [10, 20, 30];
+    const factors: i32[2] = [2, 4];
+    const idx: i32 = 1;
+    const offset: i32 = 3;
+
+    const weighted: i32 = scale(weights[idx + 1] * factors[0], (offset - 1) ** 2) + (factors)[1];
+    const grid_ref: i32 = weights[0][1];
+end

@@ -1,0 +1,20 @@
+// TEST: tests/expressions/boolean_and_comparison.nova
+// KIND: PASS
+// FLAGS: --ast
+// EXPECT_OUT: BinaryExpr (or)
+// EXPECT_OUT: BinaryExpr (and)
+// EXPECT_OUT: BinaryExpr (==)
+// EXPECT_OUT: BinaryExpr (!=)
+// EXPECT_OUT: BinaryExpr (<)
+// EXPECT_OUT: BinaryExpr (>=)
+// EXIT_CODE: 0
+
+ignite do
+    const a: i32 = 5;
+    const b: i32 = 10;
+    const flag1: bool = true;
+    const flag2: bool = false;
+
+    const precedence_chain: bool = a + 1 < b * 2 == flag1 and not flag2 or a >= b;
+    const grouped: bool = not (a == b) and (a < b or flag1 != flag2);
+end

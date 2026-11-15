@@ -1,0 +1,19 @@
+// TEST: tests/expressions/unary_and_power.nova
+// KIND: PASS
+// FLAGS: --ast
+// EXPECT_OUT: UnaryExpr (-)
+// EXPECT_OUT: BinaryExpr (**)
+// EXPECT_OUT: UnaryExpr (not)
+// EXIT_CODE: 0
+
+ignite do
+    const a: i32 = 2;
+    const b: i32 = 3;
+    const flag: bool = true;
+
+    const neg_pow: i32 = -a ** b;
+    const paren_neg_pow: i32 = (-a) ** b;
+    const pow_neg_exp: i32 = a ** -b;
+    const dbl_neg: i32 = - -a;
+    const dbl_not: bool = not not flag;
+end
