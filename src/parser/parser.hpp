@@ -2,6 +2,8 @@
 #define NOVA_PARSER_PARSER_HPP
 
 #include "lexer/token.hpp"
+#include "ast/ast_node.hpp"
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -30,7 +32,13 @@ public:
     bool has_next_token() const;
     const Token& peek_token() const;
     Token consume_token();
+    const Token& consume_token_ref();
     const Token& last_token() const { return m_last_token; }
+
+    // AST root ownership
+    void set_root(std::unique_ptr<ProgramNode> root) { m_root = std::move(root); }
+    ProgramNode* root() const { return m_root.get(); }
+    const std::string& filename() const { return m_filename; }
 
 private:
     std::string m_filename;
@@ -39,6 +47,7 @@ private:
     Token m_last_token{TokenKind::TOKEN_EOF, "", SourceLocation{}};
     bool m_has_error = false;
     std::vector<std::string> m_errors;
+    std::unique_ptr<ProgramNode> m_root;
 };
 
 } // namespace nova

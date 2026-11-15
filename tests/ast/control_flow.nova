@@ -1,0 +1,51 @@
+// TEST: tests/ast/control_flow.nova
+// KIND: PASS
+// FLAGS: --ast
+// EXPECT_OUT: RoutineDecl check(val: i32) -> bool
+// EXPECT_OUT: Require
+// EXPECT_OUT: Orbit i
+// EXPECT_OUT: Detect
+// EXPECT_OUT: Redetect
+// EXPECT_OUT: Fallback
+// EXPECT_OUT: Cruise
+// EXPECT_OUT: Route
+// EXPECT_OUT: Receive x
+// EXPECT_OUT: Transmit
+// EXIT_CODE: 0
+
+routine check(val: i32) -> bool do
+    require val >= 0;
+    ret val > 0;
+end
+
+routine ping() do
+    transmit("ping");
+    ret;
+end
+
+ignite do
+    flux x: i32 = 0;
+    receive(x);
+    verify x >= 0;
+
+    orbit i in 0..5 step 2 do
+        detect i == 2 do
+            skip;
+        redetect i == 4 do
+            halt;
+        fallback do
+            transmit("step: ", i);
+        end
+    end
+
+    cruise x > 0 do
+        x = x - 1;
+    end
+
+    route x do
+        case 0:
+            ping();
+        default:
+            check(x);
+    end
+end

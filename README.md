@@ -3,7 +3,7 @@
 > **NOVA**: A compiled, statically-typed programming language engineered with a **Cosmic Telemetry & Systems Computing** aesthetic. Built with Flex, Bison, and C++17.
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Phase](https://img.shields.io/badge/phase-Phase%203%20Complete-blue)](#)
+[![Phase](https://img.shields.io/badge/phase-Phase%204%20Complete-blue)](#)
 [![License](https://img.shields.io/badge/license-MIT-informational)](#)
 
 ---
@@ -64,7 +64,8 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
 | **Phase 1: Project Bootstrap** | Completed | Cross-platform `Makefile`, CLI driver (`--help`, `--version`, flags), and 5-state automated Python test harness. |
 | **Phase 2: Flex Lexer** | Completed | Token model, Flex scanner, C++ token stream driver, `--tokens` flag, demo program, keyword counter, editor extension, and lexer tests. |
 | **Phase 3: Bison Parser** | Completed | Pure reentrant LALR(1) Bison parser (`0` conflicts), statement-level error recovery, `--parse` flag, and parser test suite. |
-| **Phase 4: Abstract Syntax Tree (AST)** | Next | `ASTNode` hierarchy, `ASTVisitor` pattern, and `--ast` tree dump. |
+| **Phase 4: Abstract Syntax Tree (AST)** | Completed | Polymorphic AST node hierarchy (24 concrete nodes), `ASTVisitor`, `ASTPrinter`, Bison AST construction, `--ast` flag, and AST tests. |
+| **Phase 5: Expressions & Precedence** | Next | Deep expression AST verification, operator precedence boundary tests, and shift/reduce validation. |
 
 ### Phase-by-Phase Files & Verification Log
 
@@ -95,6 +96,13 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
   - Valid grammar tests: [`ignite.nova`](tests/parser/ignite.nova), [`routines_and_arrays.nova`](tests/parser/routines_and_arrays.nova), [`control_flow.nova`](tests/parser/control_flow.nova)
   - Syntax diagnostic & recovery tests: [`missing_end.nova`](tests/parser/missing_end.nova), [`missing_semicolon.nova`](tests/parser/missing_semicolon.nova), [`unexpected_token.nova`](tests/parser/unexpected_token.nova), [`missing_ignite.nova`](tests/parser/missing_ignite.nova), [`invalid_array_decl.nova`](tests/parser/invalid_array_decl.nova), [`error_recovery.nova`](tests/parser/error_recovery.nova)
 - **Result**: GNU Bison (`-Wall -Wcounterexamples`) builds with **0 shift/reduce and 0 reduce/reduce conflicts**; **9 / 9** parser tests passing (`3 PASS`, `6 EXPECTED ERROR`), [`examples/demo.nova`](examples/demo.nova) passes `--parse`, cumulative suite **25 / 25** passing (`14 PASS`, `11 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
+
+#### Phase 4 — Abstract Syntax Tree (AST)
+- **Code Files**: [`src/ast/ast_node.hpp`](src/ast/ast_node.hpp), [`src/ast/ast_visitor.hpp`](src/ast/ast_visitor.hpp), [`src/ast/ast_printer.hpp`](src/ast/ast_printer.hpp), [`src/ast/ast_printer.cpp`](src/ast/ast_printer.cpp), updated [`src/parser/parser.y`](src/parser/parser.y), [`src/parser/parser.hpp`](src/parser/parser.hpp), [`src/parser/parser.cpp`](src/parser/parser.cpp), [`src/main.cpp`](src/main.cpp) (`--ast`), and [`Makefile`](Makefile)
+- **Test Files** (4 files in [`tests/ast/`](tests/ast/)):
+  - Valid AST structure tests: [`declarations.nova`](tests/ast/declarations.nova), [`expressions.nova`](tests/ast/expressions.nova), [`control_flow.nova`](tests/ast/control_flow.nova)
+  - Negative AST error handling test: [`invalid_syntax.nova`](tests/ast/invalid_syntax.nova)
+- **Result**: Zero Bison conflicts (`-Wall`) and leak-free `%destructor` cleanup on syntax errors; **4 / 4** AST tests passing (`3 PASS`, `1 EXPECTED ERROR`), [`examples/demo.nova`](examples/demo.nova) dumps full AST cleanly via `--ast`, cumulative suite **29 / 29** passing (`17 PASS`, `12 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
 
 ---
 
@@ -161,7 +169,7 @@ General Options:
 Pipeline Inspection Flags:
   --tokens <file>         Lexical analysis: scan and dump token stream with coordinates
   --parse <file>          Syntax analysis: parse and verify grammar
-  --ast <file>            Syntax analysis: parse and dump AST (Phase 4)
+  --ast <file>            Syntax analysis: parse and dump AST
   --symbols <file>        Semantic analysis: dump symbol tables (Phase 6)
   --contracts <file>      Verification: inspect contracts & preconditions (Phase 15)
   --baseline-ir <file>    IR: emit baseline Three-Address Code (Phase 17)
@@ -176,6 +184,9 @@ Pipeline Inspection Flags:
 
 # Validate syntax using the Bison LALR(1) parser
 ./nova --parse examples/demo.nova
+
+# Dump Abstract Syntax Tree
+./nova --ast examples/demo.nova
 
 # Scan a lexer test file
 ./nova --tokens tests/lexer/keywords.nova
@@ -198,7 +209,7 @@ The test harness [`scripts/test_runner.py`](scripts/test_runner.py) strictly val
 make test
 ```
 
-Current test coverage: **25 / 25 tests passing** (`14 PASS`, `11 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, and statement error recovery.
+Current test coverage: **29 / 29 tests passing** (`17 PASS`, `12 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, and AST construction/printing.
 
 ---
 
@@ -364,14 +375,20 @@ NOVA-Compiler/
 │   │   ├── lex.yy.c              # Generated Flex scanner
 │   │   ├── lexer.hpp             # Lexer C++ class interface
 │   │   └── lexer.cpp             # Lexer C++ driver
-│   └── parser/                   # Syntactic analysis subsystem (LALR(1))
+│   ├── parser/                   # Syntactic analysis subsystem (LALR(1))
 │       ├── parser.y              # GNU Bison grammar specification
 │       ├── parser.hpp            # Parser C++ class interface
 │       └── parser.cpp            # Parser driver and token bridge
+│   └── ast/                      # Abstract Syntax Tree subsystem
+│       ├── ast_node.hpp          # Polymorphic AST node hierarchy
+│       ├── ast_visitor.hpp       # ASTVisitor interface
+│       ├── ast_printer.hpp       # Indented AST dump visitor
+│       └── ast_printer.cpp       # ASTPrinter implementation
 ├── tests/                        # Automated test suites
 │   ├── cli/                      # CLI driver verification tests
 │   ├── lexer/                    # Comprehensive tokenization test cases
-│   └── parser/                   # Syntactic validity & diagnostic tests
+│   ├── parser/                   # Syntactic validity & diagnostic tests
+│   └── ast/                      # AST construction & dump tests
 ├── examples/                     # Demonstration programs
 │   └── demo.nova                 # Full demo exercising all 34 keywords
 ├── tools/                        # Utility programs
@@ -392,7 +409,7 @@ NOVA-Compiler/
 ## 11. Roadmap (Upcoming Phases)
 
 - [x] **Phase 3: Bison Parser** — Core parser productions (`ignite do ... end`, `routine`, `T[N]`, multi-arg `transmit`), syntax recovery, and diagnostic source locations.
-- [ ] **Phase 4: Abstract Syntax Tree (AST)** — Polymorphic AST hierarchy (`ASTNode`, `ASTVisitor`, `--ast`).
+- [x] **Phase 4: Abstract Syntax Tree (AST)** — Polymorphic AST hierarchy (`ASTNode`, `ASTVisitor`, `--ast`).
 - [ ] **Phase 5: Expressions & Precedence** — Operator hierarchy and shift/reduce resolution.
 - [ ] **Phase 6: Variables & Symbol Table** — Scoping depth, `const` immutability, `flux` tracking.
 - [ ] **Phase 7: Type Checking** — Static type enforcement for `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` arrays.

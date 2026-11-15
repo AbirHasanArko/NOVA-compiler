@@ -1,5 +1,6 @@
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
+#include "ast/ast_printer.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -216,9 +217,20 @@ int main(int argc, char* argv[]) {
             std::cout << "[NOVA Parser]: Syntax check passed for '" << options.input_file << "'.\n";
             return 0;
         }
-        case nova::Mode::AST:
-            std::cout << "[NOVA Phase 4 AST]: AST dump will be implemented in Phase 4 for: " << options.input_file << "\n";
-            break;
+        case nova::Mode::AST: {
+            nova::Parser parser(options.input_file);
+            if (!parser.parse()) {
+                for (const auto& err : parser.errors()) {
+                    std::cerr << err << "\n";
+                }
+                return 1;
+            }
+            if (parser.root()) {
+                nova::ASTPrinter printer(std::cout);
+                parser.root()->accept(printer);
+            }
+            return 0;
+        }
         case nova::Mode::Symbols:
             std::cout << "[NOVA Phase 6 Symbols]: Symbol resolution will be implemented in Phase 6 for: " << options.input_file << "\n";
             break;

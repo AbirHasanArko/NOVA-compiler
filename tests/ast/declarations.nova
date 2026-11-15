@@ -1,0 +1,19 @@
+// TEST: tests/ast/declarations.nova
+// KIND: PASS
+// FLAGS: --ast
+// EXPECT_OUT: ConstDecl limit: i32
+// EXPECT_OUT: FluxDecl count: i32
+// EXPECT_OUT: FluxDecl buffer: i32[3]
+// EXPECT_OUT: ArrayLiteral
+// EXPECT_OUT: IndexAccess
+// EXIT_CODE: 0
+
+ignite do
+    const limit: i32 = 100;
+    flux count: i32;
+    flux flag: bool = true;
+    flux letter: char = 'N';
+    flux buffer: i32[3] = [1, 2, 3];
+    count = limit;
+    buffer[1] = 42;
+end

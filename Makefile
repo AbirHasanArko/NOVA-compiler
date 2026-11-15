@@ -25,7 +25,7 @@ BIN_DIR := bin
 
 # Source and Object files
 GEN_SRCS := src/lexer/lex.yy.c src/parser/parser.tab.cpp src/parser/parser.tab.hpp
-OBJS := $(BUILD_DIR)/main.o $(BUILD_DIR)/lexer/lexer.o $(BUILD_DIR)/lexer/lex.yy.o $(BUILD_DIR)/parser/parser.o $(BUILD_DIR)/parser/parser.tab.o
+OBJS := $(BUILD_DIR)/main.o $(BUILD_DIR)/lexer/lexer.o $(BUILD_DIR)/lexer/lex.yy.o $(BUILD_DIR)/parser/parser.o $(BUILD_DIR)/parser/parser.tab.o $(BUILD_DIR)/ast/ast_printer.o
 
 .PHONY: all clean test help
 
@@ -49,8 +49,10 @@ src/parser/parser.tab.cpp src/parser/parser.tab.hpp: src/parser/parser.y
 	$(BISON_BIN) -Wall -d -o src/parser/parser.tab.cpp $<
 
 # Generated header dependencies
-$(BUILD_DIR)/parser/parser.o: src/parser/parser.cpp src/parser/parser.tab.hpp
-$(BUILD_DIR)/parser/parser.tab.o: src/parser/parser.tab.cpp src/parser/parser.tab.hpp
+$(BUILD_DIR)/main.o: src/main.cpp src/ast/ast_node.hpp src/ast/ast_printer.hpp src/ast/ast_visitor.hpp
+$(BUILD_DIR)/ast/ast_printer.o: src/ast/ast_printer.cpp src/ast/ast_printer.hpp src/ast/ast_node.hpp src/ast/ast_visitor.hpp
+$(BUILD_DIR)/parser/parser.o: src/parser/parser.cpp src/parser/parser.tab.hpp src/ast/ast_node.hpp src/ast/ast_visitor.hpp
+$(BUILD_DIR)/parser/parser.tab.o: src/parser/parser.tab.cpp src/parser/parser.tab.hpp src/ast/ast_node.hpp src/ast/ast_visitor.hpp
 
 # C++ Compilation rule for standard .cpp sources
 $(BUILD_DIR)/%.o: src/%.cpp | $(BUILD_DIR)

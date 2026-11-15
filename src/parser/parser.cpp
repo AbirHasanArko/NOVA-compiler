@@ -32,11 +32,21 @@ Token Parser::consume_token() {
     return m_last_token;
 }
 
+const Token& Parser::consume_token_ref() {
+    if (m_pos < m_tokens.size()) {
+        const Token& ref = m_tokens[m_pos++];
+        m_last_token = ref;
+        return ref;
+    }
+    return m_last_token;
+}
+
 bool Parser::parse() {
     m_tokens.clear();
     m_pos = 0;
     m_has_error = false;
     m_errors.clear();
+    m_root.reset();
 
     Lexer lexer(m_filename);
     m_tokens = lexer.tokenize();
@@ -141,9 +151,9 @@ int nova_parser_lex(NOVA_PARSER_STYPE* yylval_param, NOVA_PARSER_LTYPE* yylloc_p
         return 0;
     }
 
-    nova::Token tok = parser->consume_token();
+    const nova::Token& tok = parser->consume_token_ref();
     if (yylval_param) {
-        *yylval_param = 0;
+        yylval_param->token = &tok;
     }
     if (yylloc_param) {
         yylloc_param->first_line = tok.location.line;

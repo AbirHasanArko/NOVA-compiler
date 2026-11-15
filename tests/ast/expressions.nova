@@ -1,0 +1,26 @@
+// TEST: tests/ast/expressions.nova
+// KIND: PASS
+// FLAGS: --ast
+// EXPECT_OUT: UnaryExpr (-)
+// EXPECT_OUT: BinaryExpr (**)
+// EXPECT_OUT: BinaryExpr (and)
+// EXPECT_OUT: UnaryExpr (not)
+// EXPECT_OUT: BinaryExpr (+)
+// EXPECT_OUT: BinaryExpr (*)
+// EXPECT_OUT: RoutineCall compute
+// EXIT_CODE: 0
+
+routine compute(x: i32, y: i32) -> i32 do
+    ret x + y;
+end
+
+ignite do
+    flux a: i32 = 2;
+    flux b: i32 = 3;
+    flux c: i32 = 4;
+    flux p: i32 = -a ** b;
+    flux r: i32 = a + b * c;
+    flux g: bool = not false and a < c;
+    flux vals: i32[2] = [10, 20];
+    flux res: i32 = compute(vals[0], (a + b) * c);
+end
