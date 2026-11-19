@@ -3,7 +3,7 @@
 > **NOVA**: A compiled, statically-typed programming language engineered with a **Cosmic Telemetry & Systems Computing** aesthetic. Built with Flex, Bison, and C++17.
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Phase](https://img.shields.io/badge/phase-Phase%2010%20Complete-blue)](#)
+[![Phase](https://img.shields.io/badge/phase-Phase%2011%20Complete%20(v1.0--lab)-blue)](#)
 [![License](https://img.shields.io/badge/license-MIT-informational)](#)
 
 ---
@@ -71,7 +71,8 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
 | **Phase 8: Control Flow Semantics** | Completed | Detection branching (`detect`/`redetect`/`fallback`), `cruise` & `orbit` loops (with zero-step rejection), `route` dispatch (duplicate case detection), and loop-depth validation for `halt`/`skip`. |
 | **Phase 9: Routines (`routine`)** | Completed | Routine signature & arity checks, direct/mutual recursion, array parameters & returns, and all-paths `ret` exhaustiveness verification. |
 | **Phase 10: Telemetry I/O, Execution & Output** | Completed | AST execution engine (`Interpreter`), `--interpret` & default execution, multi-arg `transmit`, `receive`, `output.txt`/`-o` file generation, runtime `verify`/`require` contracts, and [`docs/class-feature-matrix.md`](docs/class-feature-matrix.md). |
-| **Phase 11: Class Project Release (`v1.0-lab`)** | Next | Final report reference guide, submission artifacts verification, `LAB-COMPLETION.md`, and `v1.0-lab` tag. |
+| **Phase 11: Class Project Release (`v1.0-lab`)** | Completed | Deterministic submission input [`examples/submission_input.nova`](examples/submission_input.nova), handwritten report reference guide [`docs/final-report-guide.md`](docs/final-report-guide.md), [`LAB-COMPLETION.md`](LAB-COMPLETION.md), and `v1.0-lab` milestone. |
+| **Phases 12–26: Research, TAC IR & Optimizations** | Next | Differential fuzzing oracle, C++23 cross-compilation, TAC IR, contract-guided optimizations, and LLVM backend. |
 
 ### Phase-by-Phase Files & Verification Log
 
@@ -151,6 +152,10 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
   - End-to-end execution & I/O tests: [`telemetry_end_to_end.nova`](tests/integration/telemetry_end_to_end.nova), [`data_types_and_arrays_io.nova`](tests/integration/data_types_and_arrays_io.nova), [`verify_and_require_pass.nova`](tests/contracts/verify_and_require_pass.nova)
   - Runtime contract & bounds violation tests: [`require_precondition_fail.nova`](tests/contracts/require_precondition_fail.nova), [`verify_invariant_fail.nova`](tests/contracts/verify_invariant_fail.nova), [`runtime_bounds_and_div_zero.nova`](tests/contracts/runtime_bounds_and_div_zero.nova)
 - **Result**: Full end-to-end execution of NOVA programs producing console output and `output.txt` (or `-o <file>`), multi-argument `transmit` formatting for all primitive and `T[N]` array types, `receive` input scanning, runtime `require` and `verify` contract enforcement, and complete traceability audit in [`docs/class-feature-matrix.md`](docs/class-feature-matrix.md); **6 / 6** new tests passing (`3 PASS`, `3 EXPECTED ERROR`), cumulative suite **56 / 56** passing (`30 PASS`, `26 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
+
+#### Phase 11 — Mandatory Class Project Release & Submission Deliverables (`v1.0-lab`)
+- **Submission & Documentation Files**: [`examples/submission_input.nova`](examples/submission_input.nova) (deterministic end-to-end submission input file), [`docs/final-report-guide.md`](docs/final-report-guide.md) (comprehensive reference guide for the Handwritten Final Project Report), and [`LAB-COMPLETION.md`](LAB-COMPLETION.md) (deliverables checklist & evaluator verification guide), alongside Flex specification [`src/lexer/scanner.l`](src/lexer/scanner.l) and Bison grammar [`src/parser/parser.y`](src/parser/parser.y)
+- **Result**: Verified clean rebuild (`make clean && make && make test`) with **56 / 56** tests passing (`30 PASS`, `26 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) and deterministic `output.txt` generation from [`examples/submission_input.nova`](examples/submission_input.nova).
 
 ---
 
@@ -415,6 +420,7 @@ NOVA-Compiler/
 ├── Makefile                      # Build automation (all, clean, test, count-keywords)
 ├── AGENTS.md                     # Non-negotiable engineering rules & phase workflow
 ├── README.md                     # Root project documentation (this file)
+├── LAB-COMPLETION.md             # Class project deliverables & evaluator report
 ├── .gitignore                    # Build and IDE artifact exclusion
 ├── keyword_counts.txt            # Generated keyword frequency report
 ├── docs/                         # Authoritative project specifications
@@ -422,6 +428,8 @@ NOVA-Compiler/
 │   ├── grammar.md                # Formal LALR(1) Bison grammar
 │   ├── architecture.md           # Pipeline subsystem architecture
 │   ├── testing.md                # Testing protocol and classification standards
+│   ├── class-feature-matrix.md   # Feature-to-test traceability matrix
+│   ├── final-report-guide.md     # Reference guide for Handwritten Final Report
 │   └── research.md               # Contract & IR research specifications
 ├── src/                          # Compiler implementation (C++17)
 │   ├── main.cpp                  # CLI entrypoint and driver
@@ -464,8 +472,9 @@ NOVA-Compiler/
 │   ├── functions/                # Routine calls, recursion, arity & return tests
 │   ├── contracts/                # Runtime verify & require contract tests
 │   └── integration/              # End-to-end execution & telemetry I/O tests
-├── examples/                     # Demonstration programs
-│   └── demo.nova                 # Full demo exercising all 34 keywords
+├── examples/                     # Demonstration & submission programs
+│   ├── demo.nova                 # Full demo exercising all 34 keywords
+│   └── submission_input.nova     # Deterministic end-to-end submission input file
 ├── tools/                        # Utility programs
 │   └── keyword_counter/          # Standalone Flex keyword counter tool
 │       └── counter.l
@@ -491,5 +500,5 @@ NOVA-Compiler/
 - [x] **Phase 8: Control Flow Semantics** — Branch and loop validation.
 - [x] **Phase 9: Routines (`routine`)** — Signature checking, arity verification, call validation.
 - [x] **Phase 10: I/O & Class Project Audit** — Multi-argument `transmit`, `receive`, AST execution, `output.txt`/`-o` file generation, feature matrix, and audit.
-- [ ] **Phase 11: Class Project Release (`v1.0-lab`)** — Lab release milestone.
+- [x] **Phase 11: Class Project Release (`v1.0-lab`)** — Lab release milestone.
 - [ ] **Phases 12–26: Research, TAC IR, Optimizations & LLVM Backend**.

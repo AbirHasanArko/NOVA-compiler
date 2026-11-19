@@ -1,0 +1,102 @@
+// ==============================================================================
+// NOVA Course Submission Input File: Deep Space Telemetry & Guidance Verification
+// Deterministic end-to-end input exercising all NOVA language constructs:
+//   - Routines, recursion, preconditions (require), and array/primitive parameters
+//   - Primitive types (i32, f32, bool, char, str, void) and fixed-size arrays T[N]
+//   - Immutable (const) and mutable (flux) state bindings
+//   - 9-level expression precedence (**, unary -/not, *, /, %, +, -, comparisons, and/or)
+//   - Control flow: detect/redetect/fallback, orbit..step, cruise, route/case/default, halt, skip
+//   - Runtime invariant verification (verify) and multi-argument telemetry I/O (transmit)
+// ==============================================================================
+
+routine calibrate_gain(sensor_id: i32, base_gain: f32, factor: f32) -> f32 do
+    require sensor_id > 0 and base_gain > 0.0;
+    ret base_gain * factor + 0.25;
+end
+
+routine factorial(n: i32) -> i32 do
+    require n >= 0;
+    detect n <= 1 do
+        ret 1;
+    fallback do
+        ret n * factorial(n - 1);
+    end
+end
+
+routine sum_array(samples: i32[4]) -> i32 do
+    flux total: i32 = 0;
+    orbit idx in 0..4 step 1 do
+        total = total + samples[idx];
+    end
+    ret total;
+end
+
+routine log_banner(mission: str, sector: char) -> void do
+    require mission != "";
+    transmit("=== MISSION: ", mission, " | SECTOR: ", sector, " ===");
+    ret;
+end
+
+ignite do
+    // 1. Immutable and Mutable State Bindings
+    const mission_name: str = "NOVA-ORION-V1";
+    const sector_code: char = 'G';
+    const weights: f32[3] = [1.5, 2.0, 4.25];
+
+    flux telemetry: i32[4] = [10, 20, 30, 40];
+    flux altitude: f32 = 300.0;
+    flux online: bool = true;
+    flux channel: i32 = 202;
+
+    log_banner(mission_name, sector_code);
+
+    // 2. Array Mutation, Routine Calls & Expressions
+    telemetry[2] = 35;
+    const total_signal: i32 = sum_array(telemetry);
+    const gain: f32 = calibrate_gain(1, weights[0], weights[1]);
+    const fact_5: i32 = factorial(5);
+    const poly: i32 = 2 ** 3 ** 2 - (10 + 4 * 3) + (17 % 5);
+
+    verify online and total_signal == 105;
+    verify fact_5 == 120 and poly == 492;
+
+    transmit("Telemetry Samples : ", telemetry, " | Sum = ", total_signal);
+    transmit("Calibrated Gain   : ", gain, " | Weights = ", weights);
+    transmit("Factorial(5)      : ", fact_5, " | Precedence Check = ", poly);
+
+    // 3. Stepped Orbit Loop with Detect / Redetect / Fallback, Skip, and Halt
+    flux orbit_accum: i32 = 0;
+    orbit cycle in 1..10 step 1 do
+        detect cycle == 3 do
+            skip;
+        redetect cycle == 7 do
+            halt;
+        fallback do
+            orbit_accum = orbit_accum + cycle;
+        end
+    end
+    transmit("Orbit Accumulator : ", orbit_accum);
+
+    // 4. Conditional Cruise Loop
+    flux burn_steps: i32 = 0;
+    cruise online and altitude > 120.0 do
+        altitude = altitude - 60.0;
+        burn_steps = burn_steps + 1;
+        detect altitude <= 120.0 do
+            online = false;
+        end
+    end
+    transmit("Final Altitude    : ", altitude, " m after ", burn_steps, " burns");
+
+    // 5. Multi-way Route Dispatch
+    route channel do
+        case 101:
+            transmit("Transponder Route : PRIMARY-DEEP-SPACE");
+        case 202:
+            transmit("Transponder Route : BACKUP-UHF-RELAY");
+        default:
+            transmit("Transponder Route : STANDBY");
+    end
+
+    transmit("=== TELEMETRY SEQUENCE COMPLETE ===");
+end
