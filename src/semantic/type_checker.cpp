@@ -10,6 +10,7 @@ TypeChecker::TypeChecker(DiagnosticEngine& diagnostics)
 bool TypeChecker::check(ProgramNode& root) {
     m_symtab.reset();
     m_in_routine = false;
+    m_loop_depth = 0;
     m_current_routine_name.clear();
     m_current_return_type = TypeSpec::make_primitive(BaseType::VOID);
 
@@ -133,6 +134,7 @@ void TypeChecker::visit(ProgramNode& node) {
     }
 
     m_in_routine = false;
+    m_loop_depth = 0;
     m_symtab.enter_scope("ignite", true);
     visit_stmt_list(node.ignite_body);
     m_symtab.exit_scope();
@@ -140,6 +142,8 @@ void TypeChecker::visit(ProgramNode& node) {
 
 void TypeChecker::visit(RoutineDeclNode& node) {
     m_in_routine = true;
+    int saved_loop_depth = m_loop_depth;
+    m_loop_depth = 0;
     m_current_routine_name = node.name;
     m_current_return_type = node.return_type;
 
@@ -170,6 +174,7 @@ void TypeChecker::visit(RoutineDeclNode& node) {
 
     visit_stmt_list(node.body);
     m_symtab.exit_scope();
+    m_loop_depth = saved_loop_depth;
     m_in_routine = false;
 }
 
@@ -282,7 +287,9 @@ void TypeChecker::visit(CruiseNode& node) {
         }
     }
     m_symtab.enter_scope("cruise");
+    ++m_loop_depth;
     visit_stmt_list(node.body);
+    --m_loop_depth;
     m_symtab.exit_scope();
 }
 
@@ -312,6 +319,11 @@ void TypeChecker::visit(OrbitNode& node) {
                 node.step->location,
                 "orbit step must be of type 'i32', got '" + step_type.to_string() + "'"
             );
+        } else if (step_type.is_i32()) {
+            long long const_step = 1;
+            if (try_eval_const_i32(node.step.get(), const_step) && const_step == 0) {
+                m_diagnostics.report_error(node.step->location, "orbit step cannot be zero");
+            }
         }
     }
 
@@ -324,7 +336,9 @@ void TypeChecker::visit(OrbitNode& node) {
     loop_sym.location = node.location;
     m_symtab.declare(std::move(loop_sym));
 
+    ++m_loop_depth;
     visit_stmt_list(node.body);
+    --m_loop_depth;
     m_symtab.exit_scope();
 }
 
@@ -344,6 +358,7 @@ void TypeChecker::visit(RouteNode& node) {
         }
     }
 
+    std::unordered_map<std::string, SourceLocation> seen_cases;
     for (const auto& c : node.cases) {
         if (c.value) {
             TypeSpec case_type = evaluate(*c.value);
@@ -353,6 +368,16 @@ void TypeChecker::visit(RouteNode& node) {
                     "type mismatch in route case: selector is '" + sel_type.to_string() +
                         "', got '" + case_type.to_string() + "'"
                 );
+            }
+            auto it = seen_cases.find(c.value->value);
+            if (it != seen_cases.end()) {
+                std::ostringstream oss;
+                oss << "duplicate case value '" << c.value->value
+                    << "' in 'route' statement (previously defined at "
+                    << it->second.line << ":" << it->second.column << ")";
+                m_diagnostics.report_error(c.location, oss.str());
+            } else {
+                seen_cases.emplace(c.value->value, c.location);
             }
         }
         m_symtab.enter_scope("case");
@@ -436,8 +461,23 @@ void TypeChecker::visit(RetNode& node) {
     }
 }
 
-void TypeChecker::visit(HaltNode&) {}
-void TypeChecker::visit(SkipNode&) {}
+void TypeChecker::visit(HaltNode& node) {
+    if (m_loop_depth <= 0) {
+        m_diagnostics.report_error(
+            node.location,
+            "'halt' statement is only allowed inside a 'cruise' or 'orbit' loop"
+        );
+    }
+}
+
+void TypeChecker::visit(SkipNode& node) {
+    if (m_loop_depth <= 0) {
+        m_diagnostics.report_error(
+            node.location,
+            "'skip' statement is only allowed inside a 'cruise' or 'orbit' loop"
+        );
+    }
+}
 
 void TypeChecker::visit(LiteralNode& node) {
     switch (node.kind) {

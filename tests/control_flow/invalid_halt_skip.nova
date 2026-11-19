@@ -1,0 +1,28 @@
+// TEST: tests/control_flow/invalid_halt_skip.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: 'skip' statement is only allowed inside a 'cruise' or 'orbit' loop
+// EXPECT_ERR: 'halt' statement is only allowed inside a 'cruise' or 'orbit' loop
+// EXIT_CODE: 1
+
+routine bad_routine() -> void do
+    skip;
+    ret;
+end
+
+ignite do
+    const x: i32 = 1;
+
+    detect x > 0 do
+        skip;
+    end
+
+    route x do
+        case 1:
+            halt;
+        default:
+            transmit("none");
+    end
+
+    halt;
+end

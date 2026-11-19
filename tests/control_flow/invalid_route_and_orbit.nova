@@ -1,0 +1,29 @@
+// TEST: tests/control_flow/invalid_route_and_orbit.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: orbit step cannot be zero
+// EXPECT_ERR: duplicate case value '101' in 'route' statement
+// EXPECT_ERR: route selector must be of type 'i32', 'char', or 'bool', got 'str'
+// EXIT_CODE: 1
+
+ignite do
+    orbit idx in 0..10 step 0 do
+        transmit(idx);
+    end
+
+    const channel: i32 = 101;
+    route channel do
+        case 101:
+            transmit("first");
+        case 202:
+            transmit("second");
+        case 101:
+            transmit("duplicate");
+    end
+
+    const tag: str = "INVALID";
+    route tag do
+        case "INVALID":
+            transmit("bad selector");
+    end
+end

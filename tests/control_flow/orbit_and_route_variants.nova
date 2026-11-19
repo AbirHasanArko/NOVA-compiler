@@ -1,0 +1,43 @@
+// TEST: tests/control_flow/orbit_and_route_variants.nova
+// KIND: PASS
+// FLAGS: --symbols
+// EXPECT_OUT: Scope [depth=1] ignite:
+// EXPECT_OUT: k: i32 [CONST, ORBIT_INDEX
+// EXPECT_OUT: m: i32 [CONST, ORBIT_INDEX
+// EXIT_CODE: 0
+
+ignite do
+    const mode: char = 'B';
+    flux ready: bool = true;
+    flux countdown: i32 = 0;
+
+    orbit k in 10..0 step -2 do
+        countdown = countdown + k;
+    end
+
+    orbit m in 0..3 do
+        detect m == 0 do
+            ready = true;
+        redetect m == 1 do
+            ready = false;
+        redetect m == 2 do
+            ready = true;
+        end
+    end
+
+    route mode do
+        case 'A':
+            transmit("Mode A");
+        case 'B':
+            transmit("Mode B");
+        default:
+            transmit("Other mode");
+    end
+
+    route ready do
+        case true:
+            transmit("System Ready");
+        case false:
+            transmit("System Standby");
+    end
+end

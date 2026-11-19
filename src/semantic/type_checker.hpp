@@ -63,6 +63,7 @@ private:
     TypeSpec m_last_type = TypeSpec::unknown();
 
     bool m_in_routine = false;
+    int m_loop_depth = 0;
     std::string m_current_routine_name;
     TypeSpec m_current_return_type = TypeSpec::make_primitive(BaseType::VOID);
 

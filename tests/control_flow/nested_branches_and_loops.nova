@@ -1,0 +1,38 @@
+// TEST: tests/control_flow/nested_branches_and_loops.nova
+// KIND: PASS
+// FLAGS: --symbols
+// EXPECT_OUT: Scope [depth=2] orbit:
+// EXPECT_OUT: Scope [depth=3] cruise:
+// EXPECT_OUT: Scope [depth=4] detect:
+// EXPECT_OUT: Scope [depth=4] redetect:
+// EXPECT_OUT: Scope [depth=4] fallback:
+// EXIT_CODE: 0
+
+ignite do
+    flux sum: i32 = 0;
+
+    orbit row in 1..4 step 1 do
+        flux col: i32 = 0;
+
+        cruise col < 5 do
+            col = col + 1;
+
+            detect col == 2 do
+                skip;
+            redetect (row + col) > 6 do
+                halt;
+            fallback do
+                route row do
+                    case 1:
+                        sum = sum + col;
+                    case 2:
+                        halt;
+                    default:
+                        sum = sum + 1;
+                end
+            end
+        end
+    end
+
+    transmit("Final sum: ", sum);
+end
