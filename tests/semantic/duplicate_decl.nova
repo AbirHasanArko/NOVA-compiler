@@ -1,0 +1,20 @@
+// TEST: tests/semantic/duplicate_decl.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: redeclaration of 'x'
+// EXPECT_ERR: redeclaration of 'dup_param'
+// EXPECT_ERR: redeclaration of 'dup_fn'
+// EXIT_CODE: 1
+
+routine dup_fn(dup_param: i32, dup_param: f32) -> void do
+    ret;
+end
+
+routine dup_fn() -> void do
+    ret;
+end
+
+ignite do
+    const x: i32 = 1;
+    flux x: i32 = 2;
+end

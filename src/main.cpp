@@ -1,6 +1,8 @@
 #include "lexer/lexer.hpp"
 #include "parser/parser.hpp"
 #include "ast/ast_printer.hpp"
+#include "diagnostics/diagnostic.hpp"
+#include "semantic/symbol_resolver.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -231,9 +233,23 @@ int main(int argc, char* argv[]) {
             }
             return 0;
         }
-        case nova::Mode::Symbols:
-            std::cout << "[NOVA Phase 6 Symbols]: Symbol resolution will be implemented in Phase 6 for: " << options.input_file << "\n";
-            break;
+        case nova::Mode::Symbols: {
+            nova::Parser parser(options.input_file);
+            if (!parser.parse()) {
+                for (const auto& err : parser.errors()) {
+                    std::cerr << err << "\n";
+                }
+                return 1;
+            }
+            nova::DiagnosticEngine diagnostics;
+            nova::SymbolResolver resolver(diagnostics);
+            if (parser.root() && !resolver.resolve(*parser.root())) {
+                diagnostics.print_all(std::cerr);
+                return 1;
+            }
+            resolver.symbol_table().dump(std::cout);
+            return 0;
+        }
         case nova::Mode::Contracts:
             std::cout << "[NOVA Phase 15 Contracts]: Contract inspector will be implemented in Phase 15 for: " << options.input_file << "\n";
             break;
@@ -249,6 +265,12 @@ int main(int argc, char* argv[]) {
                 for (const auto& err : parser.errors()) {
                     std::cerr << err << "\n";
                 }
+                return 1;
+            }
+            nova::DiagnosticEngine diagnostics;
+            nova::SymbolResolver resolver(diagnostics);
+            if (parser.root() && !resolver.resolve(*parser.root())) {
+                diagnostics.print_all(std::cerr);
                 return 1;
             }
             std::cout << "[NOVA Compiler]: Compiling " << options.input_file << " ...\n";

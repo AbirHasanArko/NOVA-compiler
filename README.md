@@ -3,7 +3,7 @@
 > **NOVA**: A compiled, statically-typed programming language engineered with a **Cosmic Telemetry & Systems Computing** aesthetic. Built with Flex, Bison, and C++17.
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Phase](https://img.shields.io/badge/phase-Phase%205%20Complete-blue)](#)
+[![Phase](https://img.shields.io/badge/phase-Phase%206%20Complete-blue)](#)
 [![License](https://img.shields.io/badge/license-MIT-informational)](#)
 
 ---
@@ -66,7 +66,8 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
 | **Phase 3: Bison Parser** | Completed | Pure reentrant LALR(1) Bison parser (`0` conflicts), statement-level error recovery, `--parse` flag, and parser test suite. |
 | **Phase 4: Abstract Syntax Tree (AST)** | Completed | Polymorphic AST node hierarchy (24 concrete nodes), `ASTVisitor`, `ASTPrinter`, Bison AST construction, `--ast` flag, and AST tests. |
 | **Phase 5: Expressions & Precedence** | Completed | Verified 9-level operator precedence, associativity (`**`, unary `-`/`not`, arithmetic, comparison, logical), array indexing, and complex equations. |
-| **Phase 6: Variables & Symbol Table** | Next | Lexical scoping, symbol resolution, `const` immutability, `flux` mutability, and `--symbols` dump. |
+| **Phase 6: Variables & Symbol Table** | Completed | `DiagnosticEngine`, lexical `Scope`/`SymbolTable`, `SymbolResolver` (`const`/`flux`/array/`orbit` mutability, shadowing), `--symbols` flag, and semantic scope tests. |
+| **Phase 7: Type Checking** | Next | Standalone `TypeChecker` pass enforcing `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` type rules and bounds. |
 
 ### Phase-by-Phase Files & Verification Log
 
@@ -111,6 +112,13 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
   - Precedence & associativity tests: [`arithmetic_associativity.nova`](tests/expressions/arithmetic_associativity.nova), [`unary_and_power.nova`](tests/expressions/unary_and_power.nova), [`boolean_and_comparison.nova`](tests/expressions/boolean_and_comparison.nova), [`complex_equations_and_indexing.nova`](tests/expressions/complex_equations_and_indexing.nova)
   - Negative expression diagnostic test: [`invalid_expressions.nova`](tests/expressions/invalid_expressions.nova)
 - **Result**: Verified right-associative `**`, `-a ** b` (`-(a ** b)`), left-associative arithmetic/relational/equality/logical operators, parenthesized overrides, routine calls, and chained indexing; **5 / 5** expression tests passing (`4 PASS`, `1 EXPECTED ERROR`), cumulative suite **34 / 34** passing (`21 PASS`, `13 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
+
+#### Phase 6 — Variables & Symbol Table
+- **Code Files**: [`src/diagnostics/diagnostic.hpp`](src/diagnostics/diagnostic.hpp), [`src/diagnostics/diagnostic.cpp`](src/diagnostics/diagnostic.cpp), [`src/semantic/symbol.hpp`](src/semantic/symbol.hpp), [`src/semantic/symbol_table.cpp`](src/semantic/symbol_table.cpp), [`src/semantic/symbol_resolver.hpp`](src/semantic/symbol_resolver.hpp), [`src/semantic/symbol_resolver.cpp`](src/semantic/symbol_resolver.cpp), updated [`src/main.cpp`](src/main.cpp) (`--symbols`), and [`Makefile`](Makefile)
+- **Test Files** (4 files in [`tests/semantic/`](tests/semantic/)):
+  - Scoping & mutability resolution test: [`valid_scoping.nova`](tests/semantic/valid_scoping.nova)
+  - Negative semantic tests: [`duplicate_decl.nova`](tests/semantic/duplicate_decl.nova), [`immutable_assign.nova`](tests/semantic/immutable_assign.nova), [`undeclared_symbol.nova`](tests/semantic/undeclared_symbol.nova)
+- **Result**: Verified lexical block scoping, shadowing, same-scope redeclaration errors, undeclared identifier/routine errors, `const` / `const T[N]` / `orbit` index immutability checks across assignment and `receive`; **4 / 4** semantic symbol tests passing (`1 PASS`, `3 EXPECTED ERROR`), [`examples/demo.nova`](examples/demo.nova) passes `--symbols`, cumulative suite **38 / 38** passing (`22 PASS`, `16 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
 
 ---
 
@@ -178,7 +186,7 @@ Pipeline Inspection Flags:
   --tokens <file>         Lexical analysis: scan and dump token stream with coordinates
   --parse <file>          Syntax analysis: parse and verify grammar
   --ast <file>            Syntax analysis: parse and dump AST
-  --symbols <file>        Semantic analysis: dump symbol tables (Phase 6)
+  --symbols <file>        Semantic analysis: dump symbol tables
   --contracts <file>      Verification: inspect contracts & preconditions (Phase 15)
   --baseline-ir <file>    IR: emit baseline Three-Address Code (Phase 17)
   --ir <file>             IR: emit contract-aware optimized TAC (Phase 16)
@@ -195,6 +203,9 @@ Pipeline Inspection Flags:
 
 # Dump Abstract Syntax Tree
 ./nova --ast examples/demo.nova
+
+# Resolve scopes & dump lexical symbol table
+./nova --symbols examples/demo.nova
 
 # Scan a lexer test file
 ./nova --tokens tests/lexer/keywords.nova
@@ -217,7 +228,7 @@ The test harness [`scripts/test_runner.py`](scripts/test_runner.py) strictly val
 make test
 ```
 
-Current test coverage: **34 / 34 tests passing** (`21 PASS`, `13 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, AST construction, and full 9-level expression precedence.
+Current test coverage: **38 / 38 tests passing** (`22 PASS`, `16 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, AST construction, expression precedence, and lexical scoping/mutability symbol resolution.
 
 ---
 
@@ -387,17 +398,26 @@ NOVA-Compiler/
 │       ├── parser.y              # GNU Bison grammar specification
 │       ├── parser.hpp            # Parser C++ class interface
 │       └── parser.cpp            # Parser driver and token bridge
-│   └── ast/                      # Abstract Syntax Tree subsystem
-│       ├── ast_node.hpp          # Polymorphic AST node hierarchy
-│       ├── ast_visitor.hpp       # ASTVisitor interface
-│       ├── ast_printer.hpp       # Indented AST dump visitor
-│       └── ast_printer.cpp       # ASTPrinter implementation
+│   ├── ast/                      # Abstract Syntax Tree subsystem
+│   │   ├── ast_node.hpp          # Polymorphic AST node hierarchy
+│   │   ├── ast_visitor.hpp       # ASTVisitor interface
+│   │   ├── ast_printer.hpp       # Indented AST dump visitor
+│   │   └── ast_printer.cpp       # ASTPrinter implementation
+│   ├── diagnostics/              # Source-location diagnostic engine
+│   │   ├── diagnostic.hpp
+│   │   └── diagnostic.cpp
+│   └── semantic/                 # Semantic analysis & symbol table subsystem
+│       ├── symbol.hpp            # Symbol, Scope, SymbolTable definitions
+│       ├── symbol_table.cpp      # Lexical scope tree & offset tracking
+│       ├── symbol_resolver.hpp   # Scope & mutability AST visitor
+│       └── symbol_resolver.cpp   # SymbolResolver implementation
 ├── tests/                        # Automated test suites
 │   ├── cli/                      # CLI driver verification tests
 │   ├── lexer/                    # Comprehensive tokenization test cases
 │   ├── parser/                   # Syntactic validity & diagnostic tests
 │   ├── ast/                      # AST construction & dump tests
-│   └── expressions/              # Precedence, associativity & equation tests
+│   ├── expressions/              # Precedence, associativity & equation tests
+│   └── semantic/                 # Scoping, redeclaration & mutability tests
 ├── examples/                     # Demonstration programs
 │   └── demo.nova                 # Full demo exercising all 34 keywords
 ├── tools/                        # Utility programs
@@ -420,7 +440,7 @@ NOVA-Compiler/
 - [x] **Phase 3: Bison Parser** — Core parser productions (`ignite do ... end`, `routine`, `T[N]`, multi-arg `transmit`), syntax recovery, and diagnostic source locations.
 - [x] **Phase 4: Abstract Syntax Tree (AST)** — Polymorphic AST hierarchy (`ASTNode`, `ASTVisitor`, `--ast`).
 - [x] **Phase 5: Expressions & Precedence** — Operator hierarchy and shift/reduce resolution.
-- [ ] **Phase 6: Variables & Symbol Table** — Scoping depth, `const` immutability, `flux` tracking.
+- [x] **Phase 6: Variables & Symbol Table** — Scoping depth, `const` immutability, `flux` tracking.
 - [ ] **Phase 7: Type Checking** — Static type enforcement for `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` arrays.
 - [ ] **Phase 8: Control Flow Semantics** — Branch and loop validation.
 - [ ] **Phase 9: Routines (`routine`)** — Signature checking, arity verification, call validation.

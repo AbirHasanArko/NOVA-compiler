@@ -1,0 +1,20 @@
+// TEST: tests/semantic/immutable_assign.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: cannot assign to immutable constant 'limit'
+// EXPECT_ERR: cannot assign to immutable constant 'fixed_arr'
+// EXPECT_ERR: cannot assign to immutable constant 'idx'
+// EXIT_CODE: 1
+
+ignite do
+    const limit: i32 = 50;
+    const fixed_arr: i32[2] = [1, 2];
+
+    limit = 60;
+    fixed_arr[0] = 99;
+    receive(limit);
+
+    orbit idx in 0..3 do
+        idx = idx + 1;
+    end
+end

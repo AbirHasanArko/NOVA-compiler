@@ -1,0 +1,40 @@
+// TEST: tests/semantic/valid_scoping.nova
+// KIND: PASS
+// FLAGS: --symbols
+// EXPECT_OUT: Scope [depth=0] global:
+// EXPECT_OUT: Scope [depth=1] routine:helper:
+// EXPECT_OUT: Scope [depth=1] ignite:
+// EXPECT_OUT: Scope [depth=2] orbit:
+// EXIT_CODE: 0
+
+routine forward_caller(x: i32) -> i32 do
+    ret helper(x);
+end
+
+routine helper(x: i32) -> i32 do
+    const local_scale: i32 = 2;
+    ret x * local_scale;
+end
+
+ignite do
+    const threshold: i32 = 10;
+    const fixed_table: i32[2] = [3, 4];
+    flux acc: i32 = fixed_table[0];
+    flux buf: i32[2] = [0, 0];
+
+    detect acc < threshold do
+        flux acc: bool = true;
+        flux temp: i32 = 1;
+        temp = temp + 1;
+    fallback do
+        const temp: i32 = 99;
+        acc = acc + temp;
+    end
+
+    orbit idx in 0..2 do
+        buf[idx] = forward_caller(idx);
+    end
+
+    receive(acc);
+    transmit(acc, buf);
+end

@@ -1,0 +1,20 @@
+// TEST: tests/semantic/undeclared_symbol.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: undeclared identifier 'self_ref'
+// EXPECT_ERR: undeclared identifier 'ghost'
+// EXPECT_ERR: undeclared identifier 'inner_only'
+// EXPECT_ERR: undeclared routine 'missing_fn'
+// EXIT_CODE: 1
+
+ignite do
+    const self_ref: i32 = self_ref + 1;
+    flux total: i32 = ghost;
+
+    detect true do
+        const inner_only: i32 = 42;
+    end
+
+    total = inner_only;
+    missing_fn(total);
+end
