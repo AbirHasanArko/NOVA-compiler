@@ -34,6 +34,7 @@ public:
     Token consume_token();
     const Token& consume_token_ref();
     const Token& last_token() const { return m_last_token; }
+    const std::vector<Token>& tokens() const { return m_tokens; }
 
     // AST root ownership
     void set_root(std::unique_ptr<ProgramNode> root) { m_root = std::move(root); }

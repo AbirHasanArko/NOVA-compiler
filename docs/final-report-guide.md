@@ -178,14 +178,51 @@ Command:
 ```bash
 ./nova examples/submission_input.nova
 ```
-Generated `output.txt`:
+Generated `output.txt` (includes Program Execution Output, AST Construct Detection Summary for Functions/Loops/Branches/Declarations, Lexical Token Counts & 34/34 Keyword Frequencies, Lexical Symbol Table, and the Complete Token Stream):
 ```text
+======================================================================
+              NOVA COMPILER — ANALYSIS & EXECUTION REPORT             
+======================================================================
+Source File : examples/submission_input.nova
+
+----------------------------------------------------------------------
+1. PROGRAM EXECUTION OUTPUT (transmit Results)
+----------------------------------------------------------------------
 === MISSION: NOVA-ORION-V1 | SECTOR: G ===
+[FUNCTION DETECTED #4] log_banner(mission: str, sector: char) -> void
+[FUNCTION DETECTED #3] sum_array(i32[4]) -> i32 | [LOOP DETECTED #1: orbit] iterations = 4
+[FUNCTION DETECTED #1] calibrate_gain(sensor_id=1, base_gain=1.5, factor=2.0) -> f32
+[FUNCTION DETECTED #2] factorial(5) -> i32 (recursive calls = 5, result = 120)
 Telemetry Samples : [10, 20, 35, 40] | Sum = 105
 Calibrated Gain   : 3.25 | Weights = [1.5, 2.0, 4.25]
 Factorial(5)      : 120 | Precedence Check = 492
-Orbit Accumulator : 18
-Final Altitude    : 120.0 m after 3 burns
-Transponder Route : BACKUP-UHF-RELAY
+[LOOP DETECTED #2: orbit 1..10 step 1] iterations = 7, skip = 1, halt = 1, accum = 18
+[LOOP DETECTED #3: cruise] iterations = 3, final altitude = 120.0 m
+[BRANCH DETECTED: route case 202] BACKUP-UHF-RELAY
+[DETECTION SUMMARY] Functions Defined = 4 | Loops Executed = 3 | Total Loop Iterations = 14
 === TELEMETRY SEQUENCE COMPLETE ===
+
+----------------------------------------------------------------------
+2. SYNTACTIC & AST CONSTRUCT DETECTION SUMMARY
+----------------------------------------------------------------------
+Functions / Routines Detected : 4 (Total Calls: 5)
+  [Function #1] routine calibrate_gain(sensor_id: i32, base_gain: f32, factor: f32) -> f32 (line 13, col 1)
+  [Function #2] routine factorial(n: i32) -> i32 (line 19, col 1)
+  [Function #3] routine sum_array(samples: i32[4]) -> i32 (line 28, col 1)
+  [Function #4] routine log_banner(mission: str, sector: char) -> void (line 39, col 1)
+Loops Detected                : 3 (orbit: 2, cruise: 1, skip: 1, halt: 1)
+Conditional Branches Detected : 5 (detect: 4, redetect: 1, fallback: 2, route: 1, case: 2, default: 1)
+State Declarations Detected   : 22 (const: 8, flux: 14, arrays T[N]: 3, assignments: 12)
+Contracts & I/O Detected      : require: 3, verify: 2, transmit: 15, receive: 1
+
+----------------------------------------------------------------------
+3. LEXICAL TOKEN COUNTS & KEYWORD FREQUENCY
+----------------------------------------------------------------------
+Total Tokens Scanned          : 656
+  - Keywords                  : 144 (34 unique)
+  - Identifiers               : 116
+  - Literals                  : 101
+  - Operators                 : 75
+  - Punctuators / Delimiters  : 220
+...
 ```

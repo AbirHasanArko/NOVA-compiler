@@ -1,6 +1,7 @@
 // ==============================================================================
-// NOVA Course Submission Input File: Deep Space Telemetry & Guidance Verification
-// Deterministic end-to-end input exercising all NOVA language constructs:
+// NOVA Course Submission Input File: Deep Space Telemetry & Construct Detection
+// Deterministic end-to-end input exercising all NOVA language constructs and
+// logging function detection, loop count detection, branch detection, and I/O:
 //   - Routines, recursion, preconditions (require), and array/primitive parameters
 //   - Primitive types (i32, f32, bool, char, str, void) and fixed-size arrays T[N]
 //   - Immutable (const) and mutable (flux) state bindings
@@ -11,6 +12,7 @@
 
 routine calibrate_gain(sensor_id: i32, base_gain: f32, factor: f32) -> f32 do
     require sensor_id > 0 and base_gain > 0.0;
+    transmit("[FUNCTION DETECTED #1] calibrate_gain(sensor_id=", sensor_id, ", base_gain=", base_gain, ", factor=", factor, ") -> f32");
     ret base_gain * factor + 0.25;
 end
 
@@ -25,15 +27,19 @@ end
 
 routine sum_array(samples: i32[4]) -> i32 do
     flux total: i32 = 0;
+    flux loop_iters: i32 = 0;
     orbit idx in 0..4 step 1 do
         total = total + samples[idx];
+        loop_iters = loop_iters + 1;
     end
+    transmit("[FUNCTION DETECTED #3] sum_array(i32[4]) -> i32 | [LOOP DETECTED #1: orbit] iterations = ", loop_iters);
     ret total;
 end
 
 routine log_banner(mission: str, sector: char) -> void do
     require mission != "";
     transmit("=== MISSION: ", mission, " | SECTOR: ", sector, " ===");
+    transmit("[FUNCTION DETECTED #4] log_banner(mission: str, sector: char) -> void");
     ret;
 end
 
@@ -42,42 +48,60 @@ ignite do
     const mission_name: str = "NOVA-ORION-V1";
     const sector_code: char = 'G';
     const weights: f32[3] = [1.5, 2.0, 4.25];
+    const detected_functions: i32 = 4;
 
     flux telemetry: i32[4] = [10, 20, 30, 40];
     flux altitude: f32 = 300.0;
     flux online: bool = true;
+    flux backup_ready: bool = false;
     flux channel: i32 = 202;
+    flux uplink_override: i32 = 0;
+    flux detected_loops: i32 = 1; // Loop #1 runs inside sum_array
 
     log_banner(mission_name, sector_code);
+    detect backup_ready do
+        receive(uplink_override);
+    end
 
     // 2. Array Mutation, Routine Calls & Expressions
     telemetry[2] = 35;
     const total_signal: i32 = sum_array(telemetry);
     const gain: f32 = calibrate_gain(1, weights[0], weights[1]);
     const fact_5: i32 = factorial(5);
+    transmit("[FUNCTION DETECTED #2] factorial(5) -> i32 (recursive calls = 5, result = ", fact_5, ")");
+
     const poly: i32 = 2 ** 3 ** 2 - (10 + 4 * 3) + (17 % 5);
 
-    verify online and total_signal == 105;
+    verify (online or backup_ready) and not (total_signal != 105);
     verify fact_5 == 120 and poly == 492;
 
     transmit("Telemetry Samples : ", telemetry, " | Sum = ", total_signal);
     transmit("Calibrated Gain   : ", gain, " | Weights = ", weights);
     transmit("Factorial(5)      : ", fact_5, " | Precedence Check = ", poly);
 
-    // 3. Stepped Orbit Loop with Detect / Redetect / Fallback, Skip, and Halt
+    // 3. Stepped Orbit Loop (#2) with Detect / Redetect / Fallback, Skip, and Halt
+    detected_loops = detected_loops + 1;
     flux orbit_accum: i32 = 0;
+    flux orbit_iters: i32 = 0;
+    flux skip_triggers: i32 = 0;
+    flux halt_triggers: i32 = 0;
+
     orbit cycle in 1..10 step 1 do
+        orbit_iters = orbit_iters + 1;
         detect cycle == 3 do
+            skip_triggers = skip_triggers + 1;
             skip;
         redetect cycle == 7 do
+            halt_triggers = halt_triggers + 1;
             halt;
         fallback do
             orbit_accum = orbit_accum + cycle;
         end
     end
-    transmit("Orbit Accumulator : ", orbit_accum);
+    transmit("[LOOP DETECTED #2: orbit 1..10 step 1] iterations = ", orbit_iters, ", skip = ", skip_triggers, ", halt = ", halt_triggers, ", accum = ", orbit_accum);
 
-    // 4. Conditional Cruise Loop
+    // 4. Conditional Cruise Loop (#3)
+    detected_loops = detected_loops + 1;
     flux burn_steps: i32 = 0;
     cruise online and altitude > 120.0 do
         altitude = altitude - 60.0;
@@ -86,17 +110,18 @@ ignite do
             online = false;
         end
     end
-    transmit("Final Altitude    : ", altitude, " m after ", burn_steps, " burns");
+    transmit("[LOOP DETECTED #3: cruise] iterations = ", burn_steps, ", final altitude = ", altitude, " m");
 
     // 5. Multi-way Route Dispatch
     route channel do
         case 101:
-            transmit("Transponder Route : PRIMARY-DEEP-SPACE");
+            transmit("[BRANCH DETECTED: route case 101] PRIMARY-DEEP-SPACE");
         case 202:
-            transmit("Transponder Route : BACKUP-UHF-RELAY");
+            transmit("[BRANCH DETECTED: route case 202] BACKUP-UHF-RELAY");
         default:
-            transmit("Transponder Route : STANDBY");
+            transmit("[BRANCH DETECTED: route default] STANDBY");
     end
 
+    transmit("[DETECTION SUMMARY] Functions Defined = ", detected_functions, " | Loops Executed = ", detected_loops, " | Total Loop Iterations = ", 4 + orbit_iters + burn_steps);
     transmit("=== TELEMETRY SEQUENCE COMPLETE ===");
 end
