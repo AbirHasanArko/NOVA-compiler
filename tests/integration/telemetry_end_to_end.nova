@@ -1,0 +1,54 @@
+// TEST: tests/integration/telemetry_end_to_end.nova
+// KIND: PASS
+// FLAGS: --interpret
+// EXPECT_OUT: MISSION=NOVA-1 STATUS=O
+// EXPECT_OUT: FACT5=120
+// EXPECT_OUT: CYCLE_SUM=12
+// EXPECT_OUT: ROUTE=PRIMARY
+// EXPECT_OUT: READINGS=[10, 25, 30]
+// EXIT_CODE: 0
+
+routine factorial(n: i32) -> i32 do
+    require n >= 0;
+    detect n <= 1 do
+        ret 1;
+    fallback do
+        ret n * factorial(n - 1);
+    end
+end
+
+ignite do
+    const mission: str = "NOVA-1";
+    const status: char = 'O';
+    transmit("MISSION=", mission, " STATUS=", status);
+
+    const f5: i32 = factorial(5);
+    transmit("FACT5=", f5);
+
+    flux sum: i32 = 0;
+    orbit c in 1..8 step 1 do
+        detect c == 3 do
+            skip;
+        redetect c == 6 do
+            halt;
+        fallback do
+            sum = sum + c;
+        end
+    end
+    transmit("CYCLE_SUM=", sum);
+
+    const channel: i32 = 101;
+    route channel do
+        case 101:
+            transmit("ROUTE=PRIMARY");
+        case 202:
+            transmit("ROUTE=BACKUP");
+        default:
+            transmit("ROUTE=UNKNOWN");
+    end
+
+    flux readings: i32[3] = [10, 20, 30];
+    readings[1] = 25;
+    verify readings[1] == 25;
+    transmit("READINGS=", readings);
+end

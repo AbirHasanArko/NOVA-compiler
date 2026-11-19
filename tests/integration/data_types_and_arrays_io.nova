@@ -1,0 +1,22 @@
+// TEST: tests/integration/data_types_and_arrays_io.nova
+// KIND: PASS
+// FLAGS: --interpret
+// EXPECT_OUT: DEFAULTS: 0 | 0.0 | false | [0, 0, 0]
+// EXPECT_OUT: FLOATS: [1.5, 2.0, 3.25]
+// EXPECT_OUT: BOOLS: [true, false]
+// EXIT_CODE: 0
+
+ignite do
+    flux def_i: i32;
+    flux def_f: f32;
+    flux def_b: bool;
+    flux def_arr: i32[3];
+
+    transmit("DEFAULTS: ", def_i, " | ", def_f, " | ", def_b, " | ", def_arr);
+
+    const floats: f32[3] = [1.5, 2.0, 3.25];
+    const bools: bool[2] = [true, false];
+
+    transmit("FLOATS: ", floats);
+    transmit("BOOLS: ", bools);
+end

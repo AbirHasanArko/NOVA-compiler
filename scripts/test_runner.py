@@ -132,8 +132,8 @@ def run_file_tests(compiler_path):
     for path in sorted(test_files):
         # Parse directives
         kind = TestResult.PASS
-        expect_err = None
-        expect_out = None
+        expect_errs = []
+        expect_outs = []
         exit_code = 0
         cli_flags = []
 
@@ -145,9 +145,9 @@ def run_file_tests(compiler_path):
                 if line.startswith("// KIND:"):
                     kind = line.split(":", 1)[1].strip()
                 elif line.startswith("// EXPECT_ERR:"):
-                    expect_err = line.split(":", 1)[1].strip()
+                    expect_errs.append(normalize_text(line.split(":", 1)[1].strip()))
                 elif line.startswith("// EXPECT_OUT:"):
-                    expect_out = line.split(":", 1)[1].strip()
+                    expect_outs.append(normalize_text(line.split(":", 1)[1].strip()))
                 elif line.startswith("// EXIT_CODE:"):
                     exit_code = int(line.split(":", 1)[1].strip())
                 elif line.startswith("// FLAGS:"):
@@ -167,17 +167,17 @@ def run_file_tests(compiler_path):
                 continue
 
             if kind == "PASS":
-                expected_out_norm = normalize_text(expect_out) if expect_out else None
-                if code == exit_code and (expected_out_norm is None or expected_out_norm in stdout):
+                missing_outs = [e for e in expect_outs if e not in stdout]
+                if code == exit_code and not missing_outs:
                     results.append((display_name, TestResult.PASS, "Matched expected output"))
                 else:
-                    results.append((display_name, TestResult.FAIL, f"Exit code {code} (expected {exit_code}) or output mismatch"))
+                    results.append((display_name, TestResult.FAIL, f"Exit code {code} (expected {exit_code}) or missing output: {missing_outs}"))
             elif kind == "EXPECTED_ERROR":
-                expected_err_norm = normalize_text(expect_err) if expect_err else None
-                if code == exit_code and (expected_err_norm is None or expected_err_norm in stderr):
+                missing_errs = [e for e in expect_errs if e not in stderr]
+                if code == exit_code and not missing_errs:
                     results.append((display_name, TestResult.EXPECTED_ERROR, f"Diagnostic: {stderr.strip()}"))
                 else:
-                    results.append((display_name, TestResult.UNEXPECTED_ERROR, f"Expected '{expected_err_norm}', got exit {code}"))
+                    results.append((display_name, TestResult.UNEXPECTED_ERROR, f"Missing '{missing_errs}', got exit {code}: {stderr.strip()}"))
         except Exception as e:
             results.append((normalize_text(path), TestResult.CRASH, str(e)))
 

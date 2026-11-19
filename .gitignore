@@ -22,6 +22,7 @@ src/parser/stack.hh
 *.tmp
 *.out
 *.log
+output.txt
 tests/**/*.actual
 
 # Editor & OS files

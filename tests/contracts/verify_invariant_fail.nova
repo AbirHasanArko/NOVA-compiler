@@ -1,0 +1,13 @@
+// TEST: tests/contracts/verify_invariant_fail.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --interpret
+// EXPECT_ERR: runtime error: invariant violation in 'verify'
+// EXIT_CODE: 1
+
+ignite do
+    flux fuel: i32 = 10;
+    cruise fuel > 0 do
+        fuel = fuel - 5;
+    end
+    verify fuel > 0;
+end

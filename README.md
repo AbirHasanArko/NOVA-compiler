@@ -3,7 +3,7 @@
 > **NOVA**: A compiled, statically-typed programming language engineered with a **Cosmic Telemetry & Systems Computing** aesthetic. Built with Flex, Bison, and C++17.
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Phase](https://img.shields.io/badge/phase-Phase%209%20Complete-blue)](#)
+[![Phase](https://img.shields.io/badge/phase-Phase%2010%20Complete-blue)](#)
 [![License](https://img.shields.io/badge/license-MIT-informational)](#)
 
 ---
@@ -70,7 +70,8 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
 | **Phase 7: Type Checking** | Completed | Standalone `TypeChecker` pass enforcing `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` type rules, operator compatibility, constant array bounds, and condition checks. |
 | **Phase 8: Control Flow Semantics** | Completed | Detection branching (`detect`/`redetect`/`fallback`), `cruise` & `orbit` loops (with zero-step rejection), `route` dispatch (duplicate case detection), and loop-depth validation for `halt`/`skip`. |
 | **Phase 9: Routines (`routine`)** | Completed | Routine signature & arity checks, direct/mutual recursion, array parameters & returns, and all-paths `ret` exhaustiveness verification. |
-| **Phase 10: Telemetry I/O, Execution & Output** | Next | AST execution interpreter, multi-argument `transmit`, `receive`, output file generation (`output.txt` / `-o`), and feature matrix audit. |
+| **Phase 10: Telemetry I/O, Execution & Output** | Completed | AST execution engine (`Interpreter`), `--interpret` & default execution, multi-arg `transmit`, `receive`, `output.txt`/`-o` file generation, runtime `verify`/`require` contracts, and [`docs/class-feature-matrix.md`](docs/class-feature-matrix.md). |
+| **Phase 11: Class Project Release (`v1.0-lab`)** | Next | Final report reference guide, submission artifacts verification, `LAB-COMPLETION.md`, and `v1.0-lab` tag. |
 
 ### Phase-by-Phase Files & Verification Log
 
@@ -144,6 +145,13 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
   - Negative routine signature & return tests: [`invalid_arity_and_arg_types.nova`](tests/functions/invalid_arity_and_arg_types.nova), [`invalid_returns.nova`](tests/functions/invalid_returns.nova)
 - **Result**: Verified direct and mutual recursion, array parameters and array return values, `require` precondition checking, call arity and argument type enforcement, void vs non-void `ret` validation, and all-paths return exhaustiveness; **4 / 4** routine tests passing (`2 PASS`, `2 EXPECTED ERROR`), cumulative suite **50 / 50** passing (`27 PASS`, `23 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
 
+#### Phase 10 — Telemetry I/O, Execution & Output Generation
+- **Code & Documentation Files**: [`src/codegen/interpreter.hpp`](src/codegen/interpreter.hpp), [`src/codegen/interpreter.cpp`](src/codegen/interpreter.cpp), [`docs/class-feature-matrix.md`](docs/class-feature-matrix.md), updated [`src/main.cpp`](src/main.cpp) (`--interpret`, default execution, `output.txt` / `-o <file>` output file generation), [`scripts/test_runner.py`](scripts/test_runner.py) (multi-line `EXPECT_OUT`/`EXPECT_ERR` verification), [`Makefile`](Makefile), and [`.gitignore`](.gitignore)
+- **Test Files** (6 new files across [`tests/integration/`](tests/integration/) and [`tests/contracts/`](tests/contracts/)):
+  - End-to-end execution & I/O tests: [`telemetry_end_to_end.nova`](tests/integration/telemetry_end_to_end.nova), [`data_types_and_arrays_io.nova`](tests/integration/data_types_and_arrays_io.nova), [`verify_and_require_pass.nova`](tests/contracts/verify_and_require_pass.nova)
+  - Runtime contract & bounds violation tests: [`require_precondition_fail.nova`](tests/contracts/require_precondition_fail.nova), [`verify_invariant_fail.nova`](tests/contracts/verify_invariant_fail.nova), [`runtime_bounds_and_div_zero.nova`](tests/contracts/runtime_bounds_and_div_zero.nova)
+- **Result**: Full end-to-end execution of NOVA programs producing console output and `output.txt` (or `-o <file>`), multi-argument `transmit` formatting for all primitive and `T[N]` array types, `receive` input scanning, runtime `require` and `verify` contract enforcement, and complete traceability audit in [`docs/class-feature-matrix.md`](docs/class-feature-matrix.md); **6 / 6** new tests passing (`3 PASS`, `3 EXPECTED ERROR`), cumulative suite **56 / 56** passing (`30 PASS`, `26 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
+
 ---
 
 ## 3. Prerequisites & Toolchain Setup
@@ -211,6 +219,7 @@ Pipeline Inspection Flags:
   --parse <file>          Syntax analysis: parse and verify grammar
   --ast <file>            Syntax analysis: parse and dump AST
   --symbols <file>        Semantic analysis: dump symbol tables
+  --interpret <file>      Execution: evaluate AST and emit program output
   --contracts <file>      Verification: inspect contracts & preconditions (Phase 15)
   --baseline-ir <file>    IR: emit baseline Three-Address Code (Phase 17)
   --ir <file>             IR: emit contract-aware optimized TAC (Phase 16)
@@ -230,6 +239,10 @@ Pipeline Inspection Flags:
 
 # Resolve scopes & dump lexical symbol table
 ./nova --symbols examples/demo.nova
+
+# Execute a NOVA program and generate output.txt (or custom -o <file>)
+./nova examples/demo.nova
+./nova --interpret examples/demo.nova -o result.txt
 
 # Scan a lexer test file
 ./nova --tokens tests/lexer/keywords.nova
@@ -252,7 +265,7 @@ The test harness [`scripts/test_runner.py`](scripts/test_runner.py) strictly val
 make test
 ```
 
-Current test coverage: **50 / 50 tests passing** (`27 PASS`, `23 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, AST construction, expression precedence, lexical scoping/mutability resolution, static type/bounds checking, control flow validation, and routine signature/return exhaustiveness.
+Current test coverage: **56 / 56 tests passing** (`30 PASS`, `26 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, AST construction, expression precedence, lexical scoping/mutability resolution, static type/bounds checking, control flow validation, routine signature/return exhaustiveness, runtime contracts (`verify`/`require`), and end-to-end telemetry I/O execution.
 
 ---
 
@@ -430,13 +443,16 @@ NOVA-Compiler/
 │   ├── diagnostics/              # Source-location diagnostic engine
 │   │   ├── diagnostic.hpp
 │   │   └── diagnostic.cpp
-│   └── semantic/                 # Semantic analysis & symbol table subsystem
-│       ├── symbol.hpp            # Symbol, Scope, SymbolTable definitions
-│       ├── symbol_table.cpp      # Lexical scope tree & offset tracking
-│       ├── symbol_resolver.hpp   # Scope & mutability AST visitor
-│       ├── symbol_resolver.cpp   # SymbolResolver implementation
-│       ├── type_checker.hpp      # Static TypeChecker AST visitor
-│       └── type_checker.cpp      # TypeChecker & constant bounds implementation
+│   ├── semantic/                 # Semantic analysis & symbol table subsystem
+│   │   ├── symbol.hpp            # Symbol, Scope, SymbolTable definitions
+│   │   ├── symbol_table.cpp      # Lexical scope tree & offset tracking
+│   │   ├── symbol_resolver.hpp   # Scope & mutability AST visitor
+│   │   ├── symbol_resolver.cpp   # SymbolResolver implementation
+│   │   ├── type_checker.hpp      # Static TypeChecker AST visitor
+│   │   └── type_checker.cpp      # TypeChecker & constant bounds implementation
+│   └── codegen/                  # Execution & code generation subsystem
+│       ├── interpreter.hpp       # AST execution engine & RuntimeValue
+│       └── interpreter.cpp       # Interpreter & telemetry I/O implementation
 ├── tests/                        # Automated test suites
 │   ├── cli/                      # CLI driver verification tests
 │   ├── lexer/                    # Comprehensive tokenization test cases
@@ -445,7 +461,9 @@ NOVA-Compiler/
 │   ├── expressions/              # Precedence, associativity & equation tests
 │   ├── semantic/                 # Scoping, mutability, type & bounds tests
 │   ├── control_flow/             # Nested branch, loop, route & halt/skip tests
-│   └── functions/                # Routine calls, recursion, arity & return tests
+│   ├── functions/                # Routine calls, recursion, arity & return tests
+│   ├── contracts/                # Runtime verify & require contract tests
+│   └── integration/              # End-to-end execution & telemetry I/O tests
 ├── examples/                     # Demonstration programs
 │   └── demo.nova                 # Full demo exercising all 34 keywords
 ├── tools/                        # Utility programs
@@ -472,6 +490,6 @@ NOVA-Compiler/
 - [x] **Phase 7: Type Checking** — Static type enforcement for `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` arrays.
 - [x] **Phase 8: Control Flow Semantics** — Branch and loop validation.
 - [x] **Phase 9: Routines (`routine`)** — Signature checking, arity verification, call validation.
-- [ ] **Phase 10: I/O & Class Project Audit** — Multi-argument `transmit`, `receive`, feature matrix, and audit.
+- [x] **Phase 10: I/O & Class Project Audit** — Multi-argument `transmit`, `receive`, AST execution, `output.txt`/`-o` file generation, feature matrix, and audit.
 - [ ] **Phase 11: Class Project Release (`v1.0-lab`)** — Lab release milestone.
 - [ ] **Phases 12–26: Research, TAC IR, Optimizations & LLVM Backend**.

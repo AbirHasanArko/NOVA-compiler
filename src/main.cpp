@@ -4,6 +4,7 @@
 #include "diagnostics/diagnostic.hpp"
 #include "semantic/symbol_resolver.hpp"
 #include "semantic/type_checker.hpp"
+#include "codegen/interpreter.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -30,6 +31,7 @@ void print_help(const std::string& program_name) {
     std::cout << "  --parse <file>          Syntax analysis: parse and verify grammar\n";
     std::cout << "  --ast <file>            Syntax analysis: parse and dump AST\n";
     std::cout << "  --symbols <file>        Semantic analysis: validate and dump symbol tables\n";
+    std::cout << "  --interpret <file>      Execution: evaluate AST and emit program output\n";
     std::cout << "  --contracts <file>      Verification: inspect active contracts & preconditions\n";
     std::cout << "  --baseline-ir <file>    IR: emit baseline Three-Address Code (TAC)\n";
     std::cout << "  --ir <file>             IR: emit contract-aware optimized TAC\n";
@@ -42,6 +44,7 @@ enum class Mode {
     Parse,
     AST,
     Symbols,
+    Interpret,
     Contracts,
     BaselineIR,
     IR,
@@ -109,6 +112,15 @@ CompilerOptions parse_args(int argc, char* argv[]) {
             } else {
                 options.has_error = true;
                 options.error_message = "error: '--symbols' requires a source file path.";
+                return options;
+            }
+        } else if (arg == "--interpret") {
+            options.mode = Mode::Interpret;
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                options.input_file = argv[++i];
+            } else {
+                options.has_error = true;
+                options.error_message = "error: '--interpret' requires a source file path.";
                 return options;
             }
         } else if (arg == "--contracts") {
@@ -265,6 +277,7 @@ int main(int argc, char* argv[]) {
         case nova::Mode::IR:
             std::cout << "[NOVA Phase 16 IR]: Optimized IR will be implemented in Phase 16 for: " << options.input_file << "\n";
             break;
+        case nova::Mode::Interpret:
         case nova::Mode::Compile: {
             nova::Parser parser(options.input_file);
             if (!parser.parse()) {
@@ -284,8 +297,26 @@ int main(int argc, char* argv[]) {
                 diagnostics.print_all(std::cerr);
                 return 1;
             }
-            std::cout << "[NOVA Compiler]: Compiling " << options.input_file << " ...\n";
-            break;
+
+            if (options.mode == nova::Mode::Compile) {
+                std::cout << "[NOVA Compiler]: Compiling " << options.input_file << " ...\n";
+            }
+
+            nova::Interpreter interpreter(diagnostics, std::cout, std::cin);
+            if (parser.root() && !interpreter.execute(*parser.root())) {
+                diagnostics.print_all(std::cerr);
+                return 1;
+            }
+
+            std::string out_path = options.output_file.empty() ? "output.txt" : options.output_file;
+            std::ofstream out_file(out_path);
+            if (!out_file.is_open()) {
+                std::cerr << "error: cannot open output file '" << out_path << "' for writing\n";
+                return 1;
+            }
+            out_file << interpreter.captured_output();
+            out_file.close();
+            return 0;
         }
         default:
             break;

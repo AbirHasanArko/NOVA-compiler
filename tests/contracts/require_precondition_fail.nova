@@ -1,0 +1,15 @@
+// TEST: tests/contracts/require_precondition_fail.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --interpret
+// EXPECT_ERR: runtime error: precondition violation in 'require' for routine 'safe_div'
+// EXIT_CODE: 1
+
+routine safe_div(num: i32, den: i32) -> i32 do
+    require den != 0;
+    ret num / den;
+end
+
+ignite do
+    const res: i32 = safe_div(100, 0);
+    transmit(res);
+end

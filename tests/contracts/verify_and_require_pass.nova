@@ -1,0 +1,16 @@
+// TEST: tests/contracts/verify_and_require_pass.nova
+// KIND: PASS
+// FLAGS: --interpret
+// EXPECT_OUT: Velocity delta: 45.0
+// EXIT_CODE: 0
+
+routine compute_dv(accel: f32, dt: f32) -> f32 do
+    require accel > 0.0 and dt > 0.0;
+    ret accel * dt;
+end
+
+ignite do
+    const dv: f32 = compute_dv(9.0, 5.0);
+    verify dv == 45.0;
+    transmit("Velocity delta: ", dv);
+end
