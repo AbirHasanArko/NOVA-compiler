@@ -109,6 +109,47 @@ bool TypeChecker::try_eval_const_i32(const ExprNode* expr, long long& out_val) {
     return false;
 }
 
+bool TypeChecker::stmt_list_always_returns(const std::vector<StmtPtr>& stmts) {
+    for (const auto& stmt : stmts) {
+        if (stmt && stmt_always_returns(stmt.get())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool TypeChecker::stmt_always_returns(const StmtNode* stmt) {
+    if (!stmt) {
+        return false;
+    }
+    if (dynamic_cast<const RetNode*>(stmt) != nullptr) {
+        return true;
+    }
+    if (const auto* det = dynamic_cast<const DetectNode*>(stmt)) {
+        if (!det->has_fallback) {
+            return false;
+        }
+        for (const auto& branch : det->branches) {
+            if (!stmt_list_always_returns(branch.body)) {
+                return false;
+            }
+        }
+        return stmt_list_always_returns(det->fallback_body);
+    }
+    if (const auto* rt = dynamic_cast<const RouteNode*>(stmt)) {
+        if (!rt->has_default) {
+            return false;
+        }
+        for (const auto& c : rt->cases) {
+            if (!stmt_list_always_returns(c.body)) {
+                return false;
+            }
+        }
+        return stmt_list_always_returns(rt->default_body);
+    }
+    return false;
+}
+
 void TypeChecker::visit(ProgramNode& node) {
     for (const auto& routine : node.routines) {
         if (!routine) continue;
@@ -173,6 +214,16 @@ void TypeChecker::visit(RoutineDeclNode& node) {
     }
 
     visit_stmt_list(node.body);
+
+    if (!node.return_type.is_void() && !node.return_type.is_unknown) {
+        if (!stmt_list_always_returns(node.body)) {
+            m_diagnostics.report_error(
+                node.location,
+                "non-void routine '" + node.name + "' does not return a value on all control paths"
+            );
+        }
+    }
+
     m_symtab.exit_scope();
     m_loop_depth = saved_loop_depth;
     m_in_routine = false;

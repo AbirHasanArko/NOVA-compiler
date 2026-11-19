@@ -1,0 +1,36 @@
+// TEST: tests/functions/invalid_returns.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: non-void routine 'no_return' does not return a value on all control paths
+// EXPECT_ERR: non-void routine 'partial_detect' does not return a value on all control paths
+// EXPECT_ERR: void routine 'void_with_val' cannot return a value
+// EXPECT_ERR: non-void routine 'empty_ret' must return a value of type 'i32'
+// EXPECT_ERR: return type mismatch in routine 'wrong_ret_type': expected 'f32', got 'i32'
+// EXPECT_ERR: 'ret' statement is only allowed inside a routine
+// EXIT_CODE: 1
+
+routine no_return(x: i32) -> i32 do
+    const y: i32 = x + 1;
+end
+
+routine partial_detect(x: i32) -> i32 do
+    detect x > 0 do
+        ret x;
+    end
+end
+
+routine void_with_val() -> void do
+    ret 42;
+end
+
+routine empty_ret(x: i32) -> i32 do
+    ret;
+end
+
+routine wrong_ret_type(x: i32) -> f32 do
+    ret x;
+end
+
+ignite do
+    ret;
+end

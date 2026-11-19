@@ -1,0 +1,55 @@
+// TEST: tests/functions/valid_routines_and_recursion.nova
+// KIND: PASS
+// FLAGS: --symbols
+// EXPECT_OUT: factorial: (i32) -> i32 [CONST, ROUTINE
+// EXPECT_OUT: is_even_rec: (i32) -> bool [CONST, ROUTINE
+// EXPECT_OUT: is_odd_rec: (i32) -> bool [CONST, ROUTINE
+// EXPECT_OUT: scale_pair: (i32[2], i32) -> i32[2] [CONST, ROUTINE
+// EXIT_CODE: 0
+
+routine factorial(n: i32) -> i32 do
+    require n >= 0;
+    detect n <= 1 do
+        ret 1;
+    fallback do
+        ret n * factorial(n - 1);
+    end
+end
+
+routine is_even_rec(n: i32) -> bool do
+    require n >= 0;
+    detect n == 0 do
+        ret true;
+    fallback do
+        ret is_odd_rec(n - 1);
+    end
+end
+
+routine is_odd_rec(n: i32) -> bool do
+    require n >= 0;
+    detect n == 0 do
+        ret false;
+    fallback do
+        ret is_even_rec(n - 1);
+    end
+end
+
+routine scale_pair(pair: i32[2], factor: i32) -> i32[2] do
+    pair[0] = pair[0] * factor;
+    pair[1] = pair[1] * factor;
+    ret pair;
+end
+
+routine announce(msg: str) do
+    transmit("LOG: ", msg);
+end
+
+ignite do
+    const f5: i32 = factorial(5);
+    const ev: bool = is_even_rec(6);
+    const input_pair: i32[2] = [3, 7];
+    const scaled: i32[2] = scale_pair(input_pair, f5);
+
+    announce("Recursion and array routines verified");
+    transmit(f5, ev, scaled);
+end

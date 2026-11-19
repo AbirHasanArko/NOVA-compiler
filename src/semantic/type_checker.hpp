@@ -71,6 +71,8 @@ private:
     void visit_stmt_list(const std::vector<StmtPtr>& stmts);
     bool validate_declared_type(const SourceLocation& loc, const std::string& name, const TypeSpec& type);
     static bool try_eval_const_i32(const ExprNode* expr, long long& out_val);
+    static bool stmt_always_returns(const StmtNode* stmt);
+    static bool stmt_list_always_returns(const std::vector<StmtPtr>& stmts);
 };
 
 } // namespace nova

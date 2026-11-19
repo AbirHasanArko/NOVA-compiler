@@ -3,7 +3,7 @@
 > **NOVA**: A compiled, statically-typed programming language engineered with a **Cosmic Telemetry & Systems Computing** aesthetic. Built with Flex, Bison, and C++17.
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Phase](https://img.shields.io/badge/phase-Phase%208%20Complete-blue)](#)
+[![Phase](https://img.shields.io/badge/phase-Phase%209%20Complete-blue)](#)
 [![License](https://img.shields.io/badge/license-MIT-informational)](#)
 
 ---
@@ -69,7 +69,8 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
 | **Phase 6: Variables & Symbol Table** | Completed | `DiagnosticEngine`, lexical `Scope`/`SymbolTable`, `SymbolResolver` (`const`/`flux`/array/`orbit` mutability, shadowing), `--symbols` flag, and semantic scope tests. |
 | **Phase 7: Type Checking** | Completed | Standalone `TypeChecker` pass enforcing `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` type rules, operator compatibility, constant array bounds, and condition checks. |
 | **Phase 8: Control Flow Semantics** | Completed | Detection branching (`detect`/`redetect`/`fallback`), `cruise` & `orbit` loops (with zero-step rejection), `route` dispatch (duplicate case detection), and loop-depth validation for `halt`/`skip`. |
-| **Phase 9: Routines (`routine`)** | Next | Routine signature & arity checks, `ret` path exhaustiveness, and recursion/call validation. |
+| **Phase 9: Routines (`routine`)** | Completed | Routine signature & arity checks, direct/mutual recursion, array parameters & returns, and all-paths `ret` exhaustiveness verification. |
+| **Phase 10: Telemetry I/O, Execution & Output** | Next | AST execution interpreter, multi-argument `transmit`, `receive`, output file generation (`output.txt` / `-o`), and feature matrix audit. |
 
 ### Phase-by-Phase Files & Verification Log
 
@@ -135,6 +136,13 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
   - Valid control flow tests: [`nested_branches_and_loops.nova`](tests/control_flow/nested_branches_and_loops.nova), [`orbit_and_route_variants.nova`](tests/control_flow/orbit_and_route_variants.nova)
   - Negative control flow tests: [`invalid_halt_skip.nova`](tests/control_flow/invalid_halt_skip.nova), [`invalid_route_and_orbit.nova`](tests/control_flow/invalid_route_and_orbit.nova)
 - **Result**: Verified nested `detect`/`redetect`/`fallback`, `cruise`, `orbit` (stepped and negative step), `route`/`case`/`default` (`i32`, `char`, `bool`), rejection of `halt`/`skip` outside loops, rejection of duplicate `case` literals, and rejection of `orbit ... step 0`; **4 / 4** control flow tests passing (`2 PASS`, `2 EXPECTED ERROR`), cumulative suite **46 / 46** passing (`25 PASS`, `21 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
+
+#### Phase 9 — Routines (`routine`)
+- **Code Files**: Updated [`src/semantic/type_checker.hpp`](src/semantic/type_checker.hpp) and [`src/semantic/type_checker.cpp`](src/semantic/type_checker.cpp) (all-paths return exhaustiveness analysis across `ret`, `detect`/`redetect`/`fallback`, and `route`/`case`/`default`)
+- **Test Files** (4 files in [`tests/functions/`](tests/functions/)):
+  - Valid routine & recursion tests: [`valid_routines_and_recursion.nova`](tests/functions/valid_routines_and_recursion.nova), [`exhaustive_branch_returns.nova`](tests/functions/exhaustive_branch_returns.nova)
+  - Negative routine signature & return tests: [`invalid_arity_and_arg_types.nova`](tests/functions/invalid_arity_and_arg_types.nova), [`invalid_returns.nova`](tests/functions/invalid_returns.nova)
+- **Result**: Verified direct and mutual recursion, array parameters and array return values, `require` precondition checking, call arity and argument type enforcement, void vs non-void `ret` validation, and all-paths return exhaustiveness; **4 / 4** routine tests passing (`2 PASS`, `2 EXPECTED ERROR`), cumulative suite **50 / 50** passing (`27 PASS`, `23 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
 
 ---
 
@@ -244,7 +252,7 @@ The test harness [`scripts/test_runner.py`](scripts/test_runner.py) strictly val
 make test
 ```
 
-Current test coverage: **46 / 46 tests passing** (`25 PASS`, `21 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, AST construction, expression precedence, lexical scoping/mutability resolution, static type/bounds checking, and control flow validation.
+Current test coverage: **50 / 50 tests passing** (`27 PASS`, `23 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, AST construction, expression precedence, lexical scoping/mutability resolution, static type/bounds checking, control flow validation, and routine signature/return exhaustiveness.
 
 ---
 
@@ -436,7 +444,8 @@ NOVA-Compiler/
 │   ├── ast/                      # AST construction & dump tests
 │   ├── expressions/              # Precedence, associativity & equation tests
 │   ├── semantic/                 # Scoping, mutability, type & bounds tests
-│   └── control_flow/             # Nested branch, loop, route & halt/skip tests
+│   ├── control_flow/             # Nested branch, loop, route & halt/skip tests
+│   └── functions/                # Routine calls, recursion, arity & return tests
 ├── examples/                     # Demonstration programs
 │   └── demo.nova                 # Full demo exercising all 34 keywords
 ├── tools/                        # Utility programs
@@ -462,7 +471,7 @@ NOVA-Compiler/
 - [x] **Phase 6: Variables & Symbol Table** — Scoping depth, `const` immutability, `flux` tracking.
 - [x] **Phase 7: Type Checking** — Static type enforcement for `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` arrays.
 - [x] **Phase 8: Control Flow Semantics** — Branch and loop validation.
-- [ ] **Phase 9: Routines (`routine`)** — Signature checking, arity verification, call validation.
+- [x] **Phase 9: Routines (`routine`)** — Signature checking, arity verification, call validation.
 - [ ] **Phase 10: I/O & Class Project Audit** — Multi-argument `transmit`, `receive`, feature matrix, and audit.
 - [ ] **Phase 11: Class Project Release (`v1.0-lab`)** — Lab release milestone.
 - [ ] **Phases 12–26: Research, TAC IR, Optimizations & LLVM Backend**.

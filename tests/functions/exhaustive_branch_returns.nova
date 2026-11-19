@@ -1,0 +1,33 @@
+// TEST: tests/functions/exhaustive_branch_returns.nova
+// KIND: PASS
+// FLAGS: --symbols
+// EXPECT_OUT: classify_altitude: (f32) -> str [CONST, ROUTINE
+// EXPECT_OUT: decode_channel: (i32) -> i32 [CONST, ROUTINE
+// EXIT_CODE: 0
+
+routine classify_altitude(alt: f32) -> str do
+    detect alt < 100.0 do
+        ret "LOW-ORBIT";
+    redetect alt < 500.0 do
+        ret "MID-ORBIT";
+    fallback do
+        ret "DEEP-SPACE";
+    end
+end
+
+routine decode_channel(ch: i32) -> i32 do
+    route ch do
+        case 101:
+            ret 1;
+        case 202:
+            ret 2;
+        default:
+            ret 0;
+    end
+end
+
+ignite do
+    const zone: str = classify_altitude(350.0);
+    const code: i32 = decode_channel(101);
+    transmit(zone, code);
+end

@@ -1,0 +1,29 @@
+// TEST: tests/functions/invalid_arity_and_arg_types.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: routine 'compute' expects 3 argument(s), got 1
+// EXPECT_ERR: routine 'compute' expects 3 argument(s), got 4
+// EXPECT_ERR: type mismatch in argument 2 of call to 'compute': expected 'f32', got 'bool'
+// EXPECT_ERR: type mismatch in argument 3 of call to 'compute': expected 'i32[3]', got 'i32[2]'
+// EXPECT_ERR: 'local_var' is not a routine
+// EXPECT_ERR: routine 'compute' must be called rather than used as a variable
+// EXIT_CODE: 1
+
+routine compute(id: i32, gain: f32, samples: i32[3]) -> f32 do
+    require id > 0;
+    ret gain;
+end
+
+ignite do
+    const good_arr: i32[3] = [1, 2, 3];
+    const short_arr: i32[2] = [1, 2];
+    flux local_var: i32 = 10;
+
+    flux r1: f32 = compute(1);
+    flux r2: f32 = compute(1, 2.0, good_arr, 99);
+    flux r3: f32 = compute(1, true, good_arr);
+    flux r4: f32 = compute(1, 2.0, short_arr);
+
+    local_var(1);
+    flux r5: f32 = compute;
+end
