@@ -1,0 +1,23 @@
+// TEST: tests/semantic/array_type_and_bounds.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: inconsistent element types in array literal
+// EXPECT_ERR: type mismatch in declaration of 'const wrong_len'
+// EXPECT_ERR: array index must be of type 'i32'
+// EXPECT_ERR: cannot index non-array type 'i32'
+// EXPECT_ERR: array index 3 out of bounds for type 'i32[3]'
+// EXPECT_ERR: array index -1 out of bounds for type 'i32[3]'
+// EXIT_CODE: 1
+
+ignite do
+    const mixed_arr: i32[2] = [1, 2.5];
+    const wrong_len: i32[3] = [1, 2];
+
+    flux arr: i32[3] = [10, 20, 30];
+    flux scalar: i32 = 5;
+
+    flux a: i32 = arr[true];
+    flux b: i32 = scalar[0];
+    flux c: i32 = arr[3];
+    arr[-1] = 99;
+end

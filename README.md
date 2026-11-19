@@ -3,7 +3,7 @@
 > **NOVA**: A compiled, statically-typed programming language engineered with a **Cosmic Telemetry & Systems Computing** aesthetic. Built with Flex, Bison, and C++17.
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
-[![Phase](https://img.shields.io/badge/phase-Phase%206%20Complete-blue)](#)
+[![Phase](https://img.shields.io/badge/phase-Phase%207%20Complete-blue)](#)
 [![License](https://img.shields.io/badge/license-MIT-informational)](#)
 
 ---
@@ -67,7 +67,8 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
 | **Phase 4: Abstract Syntax Tree (AST)** | Completed | Polymorphic AST node hierarchy (24 concrete nodes), `ASTVisitor`, `ASTPrinter`, Bison AST construction, `--ast` flag, and AST tests. |
 | **Phase 5: Expressions & Precedence** | Completed | Verified 9-level operator precedence, associativity (`**`, unary `-`/`not`, arithmetic, comparison, logical), array indexing, and complex equations. |
 | **Phase 6: Variables & Symbol Table** | Completed | `DiagnosticEngine`, lexical `Scope`/`SymbolTable`, `SymbolResolver` (`const`/`flux`/array/`orbit` mutability, shadowing), `--symbols` flag, and semantic scope tests. |
-| **Phase 7: Type Checking** | Next | Standalone `TypeChecker` pass enforcing `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` type rules and bounds. |
+| **Phase 7: Type Checking** | Completed | Standalone `TypeChecker` pass enforcing `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` type rules, operator compatibility, constant array bounds, and condition checks. |
+| **Phase 8: Control Flow Semantics** | Next | Loop context verification (`halt`, `skip`), branch/route exhaustiveness, and nested control flow validation. |
 
 ### Phase-by-Phase Files & Verification Log
 
@@ -119,6 +120,13 @@ NOVA combines rigorous compiler construction theory (LALR(1) grammars, modular A
   - Scoping & mutability resolution test: [`valid_scoping.nova`](tests/semantic/valid_scoping.nova)
   - Negative semantic tests: [`duplicate_decl.nova`](tests/semantic/duplicate_decl.nova), [`immutable_assign.nova`](tests/semantic/immutable_assign.nova), [`undeclared_symbol.nova`](tests/semantic/undeclared_symbol.nova)
 - **Result**: Verified lexical block scoping, shadowing, same-scope redeclaration errors, undeclared identifier/routine errors, `const` / `const T[N]` / `orbit` index immutability checks across assignment and `receive`; **4 / 4** semantic symbol tests passing (`1 PASS`, `3 EXPECTED ERROR`), [`examples/demo.nova`](examples/demo.nova) passes `--symbols`, cumulative suite **38 / 38** passing (`22 PASS`, `16 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
+
+#### Phase 7 — Type Checking
+- **Code Files**: [`src/semantic/type_checker.hpp`](src/semantic/type_checker.hpp), [`src/semantic/type_checker.cpp`](src/semantic/type_checker.cpp), updated [`src/ast/ast_node.hpp`](src/ast/ast_node.hpp) (`TypeSpec` comparison/query helpers and `ExprNode::inferred_type`), [`src/main.cpp`](src/main.cpp), and [`Makefile`](Makefile)
+- **Test Files** (4 new files in [`tests/semantic/`](tests/semantic/)):
+  - Valid static typing test: [`valid_types.nova`](tests/semantic/valid_types.nova)
+  - Negative type checking tests: [`type_mismatch_expr.nova`](tests/semantic/type_mismatch_expr.nova), [`array_type_and_bounds.nova`](tests/semantic/array_type_and_bounds.nova), [`condition_and_call_types.nova`](tests/semantic/condition_and_call_types.nova)
+- **Result**: Verified strict static typing without implicit coercions across `i32`, `f32`, `bool`, `char`, `str`, `void`, and `T[N]`, compile-time constant array index bounds (`0 <= idx < N`), homogeneous array literals, `bool` branch/contract conditions, `i32` orbit bounds/steps, `route` selector/case compatibility, and routine argument/return types; **4 / 4** new type tests passing (`1 PASS`, `3 EXPECTED ERROR`), cumulative suite **42 / 42** passing (`23 PASS`, `19 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`).
 
 ---
 
@@ -228,7 +236,7 @@ The test harness [`scripts/test_runner.py`](scripts/test_runner.py) strictly val
 make test
 ```
 
-Current test coverage: **38 / 38 tests passing** (`22 PASS`, `16 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, AST construction, expression precedence, and lexical scoping/mutability symbol resolution.
+Current test coverage: **42 / 42 tests passing** (`23 PASS`, `19 EXPECTED ERROR`, `0 FAIL`, `0 CRASH`) across CLI flags, keywords, operators, literals, identifiers, comments, arrays, lexical coordinates/diagnostics, LALR(1) syntax validation, statement error recovery, AST construction, expression precedence, lexical scoping/mutability resolution, and static type/bounds checking.
 
 ---
 
@@ -410,14 +418,16 @@ NOVA-Compiler/
 │       ├── symbol.hpp            # Symbol, Scope, SymbolTable definitions
 │       ├── symbol_table.cpp      # Lexical scope tree & offset tracking
 │       ├── symbol_resolver.hpp   # Scope & mutability AST visitor
-│       └── symbol_resolver.cpp   # SymbolResolver implementation
+│       ├── symbol_resolver.cpp   # SymbolResolver implementation
+│       ├── type_checker.hpp      # Static TypeChecker AST visitor
+│       └── type_checker.cpp      # TypeChecker & constant bounds implementation
 ├── tests/                        # Automated test suites
 │   ├── cli/                      # CLI driver verification tests
 │   ├── lexer/                    # Comprehensive tokenization test cases
 │   ├── parser/                   # Syntactic validity & diagnostic tests
 │   ├── ast/                      # AST construction & dump tests
 │   ├── expressions/              # Precedence, associativity & equation tests
-│   └── semantic/                 # Scoping, redeclaration & mutability tests
+│   └── semantic/                 # Scoping, mutability, type & bounds tests
 ├── examples/                     # Demonstration programs
 │   └── demo.nova                 # Full demo exercising all 34 keywords
 ├── tools/                        # Utility programs
@@ -441,7 +451,7 @@ NOVA-Compiler/
 - [x] **Phase 4: Abstract Syntax Tree (AST)** — Polymorphic AST hierarchy (`ASTNode`, `ASTVisitor`, `--ast`).
 - [x] **Phase 5: Expressions & Precedence** — Operator hierarchy and shift/reduce resolution.
 - [x] **Phase 6: Variables & Symbol Table** — Scoping depth, `const` immutability, `flux` tracking.
-- [ ] **Phase 7: Type Checking** — Static type enforcement for `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` arrays.
+- [x] **Phase 7: Type Checking** — Static type enforcement for `i32`, `f32`, `bool`, `char`, `str`, and `T[N]` arrays.
 - [ ] **Phase 8: Control Flow Semantics** — Branch and loop validation.
 - [ ] **Phase 9: Routines (`routine`)** — Signature checking, arity verification, call validation.
 - [ ] **Phase 10: I/O & Class Project Audit** — Multi-argument `transmit`, `receive`, feature matrix, and audit.

@@ -25,7 +25,7 @@ BIN_DIR := bin
 
 # Source and Object files
 GEN_SRCS := src/lexer/lex.yy.c src/parser/parser.tab.cpp src/parser/parser.tab.hpp
-OBJS := $(BUILD_DIR)/main.o $(BUILD_DIR)/lexer/lexer.o $(BUILD_DIR)/lexer/lex.yy.o $(BUILD_DIR)/parser/parser.o $(BUILD_DIR)/parser/parser.tab.o $(BUILD_DIR)/ast/ast_printer.o $(BUILD_DIR)/diagnostics/diagnostic.o $(BUILD_DIR)/semantic/symbol_table.o $(BUILD_DIR)/semantic/symbol_resolver.o
+OBJS := $(BUILD_DIR)/main.o $(BUILD_DIR)/lexer/lexer.o $(BUILD_DIR)/lexer/lex.yy.o $(BUILD_DIR)/parser/parser.o $(BUILD_DIR)/parser/parser.tab.o $(BUILD_DIR)/ast/ast_printer.o $(BUILD_DIR)/diagnostics/diagnostic.o $(BUILD_DIR)/semantic/symbol_table.o $(BUILD_DIR)/semantic/symbol_resolver.o $(BUILD_DIR)/semantic/type_checker.o
 
 .PHONY: all clean test help
 
@@ -49,11 +49,12 @@ src/parser/parser.tab.cpp src/parser/parser.tab.hpp: src/parser/parser.y
 	$(BISON_BIN) -Wall -d -o src/parser/parser.tab.cpp $<
 
 # Generated header dependencies
-$(BUILD_DIR)/main.o: src/main.cpp src/ast/ast_node.hpp src/ast/ast_printer.hpp src/ast/ast_visitor.hpp src/diagnostics/diagnostic.hpp src/semantic/symbol.hpp src/semantic/symbol_resolver.hpp
+$(BUILD_DIR)/main.o: src/main.cpp src/ast/ast_node.hpp src/ast/ast_printer.hpp src/ast/ast_visitor.hpp src/diagnostics/diagnostic.hpp src/semantic/symbol.hpp src/semantic/symbol_resolver.hpp src/semantic/type_checker.hpp
 $(BUILD_DIR)/ast/ast_printer.o: src/ast/ast_printer.cpp src/ast/ast_printer.hpp src/ast/ast_node.hpp src/ast/ast_visitor.hpp
 $(BUILD_DIR)/diagnostics/diagnostic.o: src/diagnostics/diagnostic.cpp src/diagnostics/diagnostic.hpp src/lexer/token.hpp
 $(BUILD_DIR)/semantic/symbol_table.o: src/semantic/symbol_table.cpp src/semantic/symbol.hpp src/ast/ast_node.hpp src/lexer/token.hpp
 $(BUILD_DIR)/semantic/symbol_resolver.o: src/semantic/symbol_resolver.cpp src/semantic/symbol_resolver.hpp src/semantic/symbol.hpp src/diagnostics/diagnostic.hpp src/ast/ast_node.hpp src/ast/ast_visitor.hpp
+$(BUILD_DIR)/semantic/type_checker.o: src/semantic/type_checker.cpp src/semantic/type_checker.hpp src/semantic/symbol.hpp src/diagnostics/diagnostic.hpp src/ast/ast_node.hpp src/ast/ast_visitor.hpp
 $(BUILD_DIR)/parser/parser.o: src/parser/parser.cpp src/parser/parser.tab.hpp src/ast/ast_node.hpp src/ast/ast_visitor.hpp
 $(BUILD_DIR)/parser/parser.tab.o: src/parser/parser.tab.cpp src/parser/parser.tab.hpp src/ast/ast_node.hpp src/ast/ast_visitor.hpp
 

@@ -3,6 +3,7 @@
 #include "ast/ast_printer.hpp"
 #include "diagnostics/diagnostic.hpp"
 #include "semantic/symbol_resolver.hpp"
+#include "semantic/type_checker.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -243,7 +244,12 @@ int main(int argc, char* argv[]) {
             }
             nova::DiagnosticEngine diagnostics;
             nova::SymbolResolver resolver(diagnostics);
-            if (parser.root() && !resolver.resolve(*parser.root())) {
+            nova::TypeChecker type_checker(diagnostics);
+            if (parser.root()) {
+                resolver.resolve(*parser.root());
+                type_checker.check(*parser.root());
+            }
+            if (diagnostics.has_errors()) {
                 diagnostics.print_all(std::cerr);
                 return 1;
             }
@@ -269,7 +275,12 @@ int main(int argc, char* argv[]) {
             }
             nova::DiagnosticEngine diagnostics;
             nova::SymbolResolver resolver(diagnostics);
-            if (parser.root() && !resolver.resolve(*parser.root())) {
+            nova::TypeChecker type_checker(diagnostics);
+            if (parser.root()) {
+                resolver.resolve(*parser.root());
+                type_checker.check(*parser.root());
+            }
+            if (diagnostics.has_errors()) {
                 diagnostics.print_all(std::cerr);
                 return 1;
             }

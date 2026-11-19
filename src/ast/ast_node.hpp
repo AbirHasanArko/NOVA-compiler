@@ -26,6 +26,47 @@ struct TypeSpec {
     BaseType base = BaseType::VOID;
     bool is_array = false;
     int array_size = 0;
+    bool is_unknown = false;
+
+    static TypeSpec make_primitive(BaseType b) {
+        return TypeSpec{b, false, 0, false};
+    }
+
+    static TypeSpec make_array(BaseType b, int size) {
+        return TypeSpec{b, true, size, false};
+    }
+
+    static TypeSpec unknown() {
+        return TypeSpec{BaseType::VOID, false, 0, true};
+    }
+
+    bool is_numeric() const {
+        return !is_unknown && !is_array && (base == BaseType::I32 || base == BaseType::F32);
+    }
+
+    bool is_i32() const {
+        return !is_unknown && !is_array && base == BaseType::I32;
+    }
+
+    bool is_bool() const {
+        return !is_unknown && !is_array && base == BaseType::BOOL;
+    }
+
+    bool is_void() const {
+        return !is_unknown && !is_array && base == BaseType::VOID;
+    }
+
+    bool operator==(const TypeSpec& other) const {
+        if (is_unknown || other.is_unknown) return false;
+        if (is_array != other.is_array) return false;
+        if (base != other.base) return false;
+        if (is_array && array_size != other.array_size) return false;
+        return true;
+    }
+
+    bool operator!=(const TypeSpec& other) const {
+        return !(*this == other);
+    }
 
     static const char* base_to_string(BaseType b) {
         switch (b) {
@@ -40,6 +81,9 @@ struct TypeSpec {
     }
 
     std::string to_string() const {
+        if (is_unknown) {
+            return "<unknown>";
+        }
         std::string s = base_to_string(base);
         if (is_array) {
             s += "[" + std::to_string(array_size) + "]";
@@ -67,6 +111,8 @@ public:
 class ExprNode : public ASTNode {
 public:
     using ASTNode::ASTNode;
+
+    TypeSpec inferred_type = TypeSpec::unknown();
 };
 
 class StmtNode : public ASTNode {

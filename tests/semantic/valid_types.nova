@@ -1,0 +1,49 @@
+// TEST: tests/semantic/valid_types.nova
+// KIND: PASS
+// FLAGS: --symbols
+// EXPECT_OUT: Scope [depth=0] global:
+// EXPECT_OUT: compute_energy: (f32, f32) -> f32
+// EXPECT_OUT: Scope [depth=1] ignite:
+// EXIT_CODE: 0
+
+routine compute_energy(mass: f32, velocity: f32) -> f32 do
+    require mass > 0.0 and velocity >= 0.0;
+    ret 0.5 * mass * (velocity ** 2.0);
+end
+
+routine is_even(n: i32) -> bool do
+    ret (n % 2) == 0;
+end
+
+ignite do
+    const label: str = "ENERGY-CHECK";
+    const grade: char = 'A';
+    const counts: i32[3] = [10, 20, 30];
+    flux grid: i32[3] = [1, 2, 3];
+    flux e: f32 = compute_energy(10.0, 4.5);
+    flux ok: bool = is_even(counts[1]) and not (e < 0.0);
+
+    grid[0] = counts[2] - counts[0];
+    grid[1 + 1] = -grid[0];
+
+    detect ok and (grade == 'A') do
+        e = e + 1.0;
+    redetect label != "" do
+        e = e - 1.0;
+    fallback do
+        e = 0.0;
+    end
+
+    orbit i in 0..3 step 1 do
+        grid[i] = grid[i] * 2;
+    end
+
+    route grade do
+        case 'A':
+            transmit(label, e, grid);
+        default:
+            transmit("fallback");
+    end
+
+    verify ok or (grid[0] >= 0);
+end

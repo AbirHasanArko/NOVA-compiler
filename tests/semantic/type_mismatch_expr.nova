@@ -1,0 +1,25 @@
+// TEST: tests/semantic/type_mismatch_expr.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: type mismatch in binary '+'
+// EXPECT_ERR: modulo requires 'i32'
+// EXPECT_ERR: type mismatch in relational '<'
+// EXPECT_ERR: type mismatch in logical 'and'
+// EXPECT_ERR: logical 'not' requires 'bool' operand
+// EXPECT_ERR: unary '-' requires numeric operand
+// EXPECT_ERR: type mismatch in declaration of 'const bad_init'
+// EXPECT_ERR: type mismatch in assignment: cannot assign 'str' to 'i32'
+// EXIT_CODE: 1
+
+ignite do
+    const mixed_add: f32 = 10 + 2.5;
+    const bad_mod: f32 = 5.5 % 2.0;
+    const bad_rel: bool = 10 < 10.5;
+    const bad_and: bool = true and 1;
+    const bad_not: bool = not 0;
+    const bad_neg: bool = -true;
+    const bad_init: i32 = "not-an-int";
+
+    flux x: i32 = 1;
+    x = "wrong";
+end

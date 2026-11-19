@@ -1,0 +1,38 @@
+// TEST: tests/semantic/condition_and_call_types.nova
+// KIND: EXPECTED_ERROR
+// FLAGS: --symbols
+// EXPECT_ERR: return type mismatch in routine 'bad_ret'
+// EXPECT_ERR: condition in 'detect' must be of type 'bool'
+// EXPECT_ERR: condition in 'cruise' must be of type 'bool'
+// EXPECT_ERR: orbit range start must be of type 'i32'
+// EXPECT_ERR: orbit step must be of type 'i32'
+// EXPECT_ERR: type mismatch in route case: selector is 'i32', got 'char'
+// EXPECT_ERR: condition in 'verify' must be of type 'bool'
+// EXPECT_ERR: type mismatch in argument 1 of call to 'bad_ret'
+// EXIT_CODE: 1
+
+routine bad_ret(x: i32) -> i32 do
+    ret "not-i32";
+end
+
+ignite do
+    detect 42 do
+        transmit("bad detect");
+    end
+
+    cruise "forever" do
+        halt;
+    end
+
+    orbit i in 0.5..10 step true do
+        skip;
+    end
+
+    route 10 do
+        case 'A':
+            transmit("mismatch case");
+    end
+
+    verify 100;
+    flux res: i32 = bad_ret(3.14);
+end
